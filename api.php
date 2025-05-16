@@ -545,6 +545,7 @@ class Api{
 		}
 
 	}
+
 	private function handleLogin(){
 		$data=$this->data;
 		$conn =$this->conn;
@@ -552,7 +553,7 @@ class Api{
 		$email;
 		$password;
 
-		$accepted =['type','email','passord'];
+		$accepted =['email','password'];
 
 		foreach($data as  $attr=>$value){
 			if(!in_array($attr,$accepted)){
@@ -565,33 +566,33 @@ class Api{
 		$this->respond("error","Invalid or missing email",400);
 		}
 
-		if(!isset($data['password'])||!$this->validatePassword($data['password'])){
+		if(!isset($data['password'])){
 
-			$this->respond("error","Password format insufficient, unsafe.",400);
+			$this->respond("error","Password missing",400);
 		}
 
 		$password=$data['password'];
 
 		if(!$this->userExists($this->conn,$data['email'])){
 
-		$this->respond("error","User does not exist",401);
+			$this->respond("error","User does not exist",401);
 		}
 
 		$email=$data['email'];
 
-		$stmt=$conn->prepare("SELECT Firstname,Lastname,Api_key FROM users WHERE email=?");
+		$stmt=$conn->prepare("SELECT FirstName,LastName,Api_key FROM users WHERE email=?");
 
 		$stmt->bind_param("s",$email);
 
 		if($stmt->execute()){
 
-			$stmt->bind_result($Firstname,$Api_key,$Lastname);
+			$stmt->bind_result($Firstname,$Lastname,$Api_key,$hashedPassword);
 		
 			if($stmt->fetch()){
 
 				if(password_verify($password,$hashedPassword)) {
 					
-					$this->respond("success",[['apikey'=>$apikey,'name'=>$Firstname, 'surname'=>$Lastname]],200);
+					$this->respond("success",[['apikey'=>$Api_key,'name'=>$Firstname, 'surname'=>$Lastname]],200);
 
 				}else{
 					
@@ -614,7 +615,7 @@ class Api{
 
 			$reqType=$data['type'];
 
-			$this->fetchCurrencies();
+			// $this->fetchCurrencies();
 
 			switch($reqType){
 
