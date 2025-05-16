@@ -545,6 +545,66 @@ class Api{
 		}
 
 	}
+	private function handleLogin(){
+		$data=$this->data;
+		$conn =$this->conn;
+
+		$email;
+		$password;
+
+		$accepted =['type','email','passord'];
+
+		foreach($data as  $attr=>$value){
+			if(!in_array($attr,$accepted)){
+				$this->respond("error","Invalid Parameter",400);//checks if the data recived from the json is valid for the login request to be done 
+			}
+		}
+
+		if(!isset($data['email'])||!$this->validateEmail($data['email'])){
+
+		$this->respond("error","Invalid or missing email",400);
+		}
+
+		if(!isset($data['password'])||!$this->validatePassword($data['password'])){
+
+			$this->respond("error","Password format insufficient, unsafe.",400);
+		}
+
+		$password=$data['password'];
+
+		if(!$this->userExists($this->conn,$data['email'])){
+
+		$this->respond("error","User does not exist",401);
+		}
+
+		$email=$data['email'];
+
+		$stmt=$conn->prepare("SELECT Firstname,Lastname,Api_key FROM users WHERE email=?");
+
+		$stmt->bind_param("s",$email);
+
+		if($stmt->execute()){
+
+			$stmt->bind_result($Firstname,$Api_key,$Lastname);
+		
+			if($stmt->fetch()){
+
+				if(password_verify($password,$hashedPassword)) {
+					
+					$this->respond("success",[['apikey'=>$apikey,'name'=>$Firstname, 'surname'=>$Lastname]],200);
+
+				}else{
+					
+					$this->respond("error","Password incorrect",400);
+				}
+
+			}
+
+		}else{
+			
+			$this->respond('error', $stmt->error, 500);
+		}
+	}
 
 	public function handleRequest(){
 
