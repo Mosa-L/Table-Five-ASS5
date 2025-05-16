@@ -319,6 +319,39 @@ class Api{
 
 		$products=$this->buildQuery($data);
 
+		//Adding retailers and prices
+		foreach ($products as &$product) {
+			$productID=$product['ProductID'];
+
+			$stmt=$conn->prepare(
+				"SELECT r.RetailerName, r.Website_url, pr.Price, pr.Stock
+				FROM retailers AS r JOIN product_retailers as pr ON r.RetailerID=pr.RetailerID
+				WHERE ProductID=?"
+			);
+
+			$stmt->bind_param("i", $productID);
+			if(!$stmt->execute()){
+
+				$this->respond("error", $stmt->error, 500);
+			}
+			$result=$stmt->get_result();
+
+			$retailers=[];
+			while($row=$result->fetch_assoc()){
+
+				$retailers[] = [
+					'Name' => $row['RetailerName'],
+					'Website_url' => $row['Website_url'],
+					'Price' => $row['Price'],
+					'Stock' => $row['Stock']
+				];
+			}
+
+			$product['Retailers']=$retailers;
+			$stmt->close();
+		}
+    	unset($product);
+
 		//Adding categories [array]
 		foreach ($products as &$product) {
 			$productID = $product['ProductID'];
@@ -331,7 +364,10 @@ class Api{
 			);
 
 			$stmt->bind_param("i", $productID);
-			$stmt->execute();
+			if(!$stmt->execute()){
+
+				$this->respond("error", $stmt->error, 500);
+			}
 			$result=$stmt->get_result();
 
 			$categories=[];
@@ -356,7 +392,12 @@ class Api{
 			);
 
 			$stmt->bind_param("i", $productID);
-			$stmt->execute();
+
+			if(!$stmt->execute()){
+
+				$this->respond("error", $stmt->error, 500);
+			}
+			
 			$result=$stmt->get_result();
 
 			$specs=[];
@@ -370,9 +411,42 @@ class Api{
 		}
     	unset($product);
 
-		
+		//Adding reviews
+		foreach ($products as &$product) {
+			$productID=$product['ProductID'];
 
-		// $this->changePrices($products,'ZAR',$this->currencies);
+			$stmt=$conn->prepare(
+				"SELECT u.FirstName, u.LastName, r.Rating, r.Comment, r.ReviewDate
+				FROM users AS u JOIN review as r ON u.UserID=r.UserID
+				WHERE ProductID=?"
+			);
+
+			$stmt->bind_param("i", $productID);
+			if(!$stmt->execute()){
+
+				$this->respond("error", $stmt->error, 500);
+			}
+
+			$result=$stmt->get_result();
+
+			$reviews=[];
+			while($row=$result->fetch_assoc()){
+
+				$reviews[] = [
+					'Name' => $row['FirstName'],
+					'Surname' => $row['LastName'],
+					'Rating' => $row['Rating'],
+					'Comment' => $row['Comment'],
+					'Date' => $row['ReviewDate']
+				];
+			}
+
+			$product['Reviews']=$reviews;
+			$stmt->close();
+			//Adding lowest price
+			$product['LowestPrice']=$this->lowestPrice($product);
+		}
+    	unset($product);
 
 		if(isset($data['search'])){
 
@@ -383,12 +457,12 @@ class Api{
 
 					if ($attr=='price_min'){
 						$products = array_filter($products, function($p) use ($term) {
-							return isset($p['final_price']) && $p['final_price']>=$term;
+							return isset($p['LowestPrice']) && $p['LowestPrice']>=$term;
 						});
 
 					} else if ($attr=='price_max'){
 						$products = array_filter($products, function($p) use ($term) {
-							return isset($p['final_price']) && $p['final_price']<=$term;
+							return isset($p['LowestPrice']) && $p['LowestPrice']<=$term;
 						});
 					}
 			}
@@ -396,19 +470,19 @@ class Api{
 		}
 
 		//Sort for prices
-		if(isset($data['sort'])&&($data['sort']=='initial_price'||$data['sort']=='final_price')){
+		if(isset($data['sort'])&&($data['sort']=='price')){
 
 			if(isset($data['order'])){
 
-				$products=$this->sortProducts($products,$data['sort'],$data['order']);
+				$products=$this->sortProducts($products,'LowestPrice',$data['order']);
 
 			}else{
 
-				$products=$this->sortProducts($products,$data['sort']);
+				$products=$this->sortProducts($products,'LowestPrice');
 			}	
 		}
 
-		//Remove currency if necessary
+		//Remove ProductID if necessary
 		$returnAttr=$this->getReturnAttr($data['return']);
 
 		if (stripos($returnAttr,'ProductID')===false && $returnAttr!=='*'){
@@ -418,9 +492,7 @@ class Api{
 			unset($p);
 		}
 
-
 		$this->respond('success',$products,200);
-
 
 	}
 
@@ -519,6 +591,41 @@ class Api{
 			$this->respond('error','Type attribute missing',400);
 		}
 
+	}
+
+	private function sortProducts($products, $sortBy, $direction='ASC'){
+		usort($products, function ($a, $b) use ($sortBy, $direction){
+			
+			$valA=isset($a[$sortBy])?$a[$sortBy]:0;
+			$valB=isset($b[$sortBy])?$b[$sortBy]:0;
+
+			if($valA==$valB) return 0;
+
+			if(strtoupper($direction)==='DESC') {
+				return ($valA < $valB)? 1:-1;
+			} else {
+				return ($valA > $valB)?1:-1;
+			}
+		});
+
+		return $products;
+	}
+
+	private function lowestPrice($product){
+
+		$retailers=$product['Retailers'];
+
+		$lowest=$retailers[0]['Price'];
+
+		foreach($retailers as $r){
+
+			if($r['Price']<$lowest){
+
+				$lowest=$r['Price'];
+			}
+		}
+
+		return $lowest;
 	}
 
 }
