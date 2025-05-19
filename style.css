@@ -1,0 +1,565 @@
+/* Theme: CompareIt - Price Comparison Website
+    This stylesheet is adapted for CompareIt using the original design as a base.
+*/
+
+/*For the font*/
+@import url("https://fonts.googleapis.com/css2?family=Spartan:wght@100;200;300;400;500;600;700;800;900&display=swap");
+
+*{
+    font-family: "Spartan", sans-serif;
+    font-size: 16pt;
+    padding: 0;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+body{
+   background-image: url(images/IMG_0061.jpg);
+    
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+h1{
+    font-size: 50px;
+    line-height: 64px;
+    color: #222;
+}
+
+h2{
+    font-size: 46px;
+    margin: 30px 2px ;
+    line-height: 54px;
+    color: #222;
+}
+
+h4{
+    font-size: 20px;
+    color: #222;
+}
+
+h6{
+    font-weight: 700;
+    font-size: 50px;
+}
+
+p{
+    font-size: 16px;
+    color: #465b52;
+    margin: 15px 0 20px 0;
+}
+
+.section-padding {
+    padding: 40px 80px;
+}
+
+
+
+#homeButs {
+
+  top: 50px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  flex-basis: 40px;
+  gap: 15px;
+  position: absolute;
+  top: 75%;
+  color: black;
+}
+
+#homeButs a{
+    text-decoration: none;
+    color: black;
+}
+
+
+
+/*For Nav Bar*/
+
+
+
+.navlogo{
+
+    width:15%;
+    position: absolute;
+    left: 3%;
+    
+    /* SVG logo will scale nicely */
+}
+
+#header{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; 
+    padding: 40px 80px;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.06);/*adding shadow under nav bar*/
+    z-index: 1000;/*ensuring shadow shows*/
+    /*making nav bar stay fixed*/
+    position: sticky;
+    top: 0;
+    left: 0;
+}
+
+
+
+
+#navbar{
+    /*aligning nav bar comps in a row insted of colums*/
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+  
+  /*removing bullets from nav bar elements*/
+#navbar li{
+    list-style: none;
+    padding: 0 20px;
+    position: relative;
+}
+
+
+
+#navbar a{
+    color: black;
+    text-decoration: none;
+}
+
+#navbar a.active{/*this shows which page user is currently in by underlining the name on navbar*/
+    text-decoration: underline;
+    color: burlywood;
+}
+
+
+
+                    /*FOR PRODUCTS*/
+
+#products{
+    text-align: center;
+    position: relative;
+    z-index: 1;
+} 
+
+#products .proCont{
+    display: flex;
+    justify-content:center;
+    gap: 55px;
+    padding: 20px;
+    flex-wrap: wrap;
+}
+
+#products .pro{
+    width: 17%;
+    height: 425px;
+    min-width: 250px;
+    padding: 10px 12px;
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 20px 20px 30px rgba(0, 0, 0, 0.09);
+    margin: 15px 0;
+    transition: 0.2s ease;/*smooth transition on hover*/
+    position: relative;
+    background-color: white;
+}
+
+#products .pro:hover{/*increasing hover effect*/
+    box-shadow: 20px 20px 30px rgba(0, 0, 0, 0.2);
+}
+
+#products .pro img{/*making image fit inside its assigned box*/
+    width: 90%;
+    height: 60%;
+    border-radius: 20px;
+}
+
+#products .pro .description{
+    text-align: start;/*this makes text start on the same side the box starts*/
+    padding: 10px 0;
+}
+
+#products .pro .description h5{
+    padding-top: 7px;
+    color: #1a1a1a;
+    font-size: 14px;
+}
+
+#products .pro .description h4{/*styling price*/
+    padding-top: 7px;
+    font-size: 15px;
+    font-weight: 700;
+    color: burlywood;
+}
+
+#products .pro .compare{/*repsitioning and resizing wishlist button*/
+    width: 60px;
+    height: 40px;
+    line-height: 40px;  
+    color: burlywood;
+    position: absolute;/*every time we use absolute in child element, we have to put relative in parent element*/
+    bottom: 4.5%;
+    right: 35%;
+}
+
+#products .pro .wishlist{/*repsitioning and resizing wishlist button*/
+    width: 60px;
+    height: 40px;
+    line-height: 40px;  
+    color: burlywood;
+    position: absolute;/*every time we use absolute in child element, we have to put relative in parent element*/
+    bottom: 4.5%;
+    right: 5%;
+}
+
+#products .pro .cart{/*repsitioning and resizing wishlist button*/
+    width: 60px;
+    height: 40px;
+    line-height: 40px;  
+    color: burlywood;
+    position: absolute;/*every time we use absolute in child element, we have to put relative in parent element*/
+    bottom: 4.5%;
+    right: 20%;
+}
+
+            /*For the search bar, button & filter & sort*/
+
+.searchCont{
+    display: flex;
+    align-items: center;
+    position: relative;
+    left: 30%;
+    width: 40%;
+    border: 2px solid burlywood;
+    border-radius: 25px;
+    overflow: hidden;
+}
+
+#searchInput{
+    flex: 1; /*grows to fit container*/
+    padding: 10px;
+    border: none;
+    outline: none;
+}
+
+#searchBut{
+    background: burlywood;
+    border: none;
+    padding: 10px;
+    color: black;
+}
+
+.filters{
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    position: relative;
+    left: 30%;
+    width: 40%;
+}
+
+.filters #category{
+    font-size: 12pt;
+    padding: 5px;
+    color: black;
+}
+
+.filters #price{
+    font-size: 12pt;
+    padding: 5px;
+    color: black;
+}
+
+
+
+
+#search{
+    flex: 1; /*grows to fit container*/
+    padding: 10px;
+    border: none;
+    outline: none;
+}
+
+
+#applyFilters{
+    background: burlywood;
+    border: none;
+    padding: 10px;
+    color: black;
+}
+
+select{
+    border: 2px solid burlywood;
+    border-radius: 25px;
+}
+
+
+
+                /*For the cart page*/
+
+#cart{
+    position: relative;
+    left: 5%;
+    width: 90%;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    background-color: #ffffff;
+    border-radius: 25px;
+    margin-top: 5%;
+}
+
+#cart table{
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    white-space: nowrap;
+}
+
+#cart table img{
+    width: 20%;
+    border-radius: 5px;
+}
+/*changing width of table columns*/
+#cart table td:nth-child(1){/*targeting 1st column using nth child*/
+    width: 40%;
+    text-align: center;
+}
+
+#cart table td:nth-child(2){/*targeting 2nd column using nth child*/
+    width: 60%;
+    text-align: center;
+}
+#cart table td:nth-child(3){
+    width: 40%;
+    text-align: center;
+}
+#cart table td:nth-child(4){
+    width: 40%;
+    text-align: center;
+}
+
+#cart table td:nth-child(5){
+    width: 40%;
+    text-align: center;
+}
+
+#cart table td:nth-child(6){
+    width: 30%;
+    text-align: center;
+}
+
+#cart table td:nth-child(4) input{/*styling the quantity box*/
+    width: 30%;
+    padding: 10px 5px 10px 15px;
+}
+
+#cart table thead{/*styling the header, adding lines*/
+    border: 1px solid burlywood;
+    border-left: none;
+    border-right: none;
+}
+
+#cart table thead td{/*making font and size of text better in header*/
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 13px;
+    padding: 18px 0;
+}
+
+#cart table tbody tr td{/*adding spacing between main body and header*/
+    padding: 15px;
+}
+
+#cart table tbody td{
+    font-size: 13px;
+}
+
+/*for the checkout table*/
+#checkout{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+#cartTotal{
+    border-radius: 25px;
+    width: 50%;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    border: 1px solid burlywood;
+    background-color: #ffffff;
+    padding: 30px;
+}
+
+#cartTotal table{
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+#cartTotal table td{
+    width: 50%;
+    border: 1px solid burlywood;
+    padding: 10px;
+    font-size: 13px;
+}
+
+button.checkBut{/*For the checkout button*/
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 20px;
+    color: #000;
+    background-color: burlywood;
+    border-radius: 4px;
+    border: none;
+    outline: none;
+    transition: 0.2s;
+}
+
+
+                    /*For wishlist page+*/
+
+#wishlist{
+    position: relative;
+    left: 10%;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    background-color: #ffffff;
+    border-radius: 25px;
+    width: 80%;
+}
+
+#wishlist table{
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    white-space: nowrap;
+}
+
+#wishlist table img{
+    width: 30%;
+    border-radius: 5px;
+}
+/*changing width of table columns*/
+#wishlist table td:nth-child(1){/*targeting 1st column using nth child*/
+    width: 50%;
+    text-align: center;
+}
+
+#wishlist table td:nth-child(2){/*targeting 2nd column using nth child*/
+    width: 70%;
+    text-align: center;
+}
+#wishlist table td:nth-child(3){
+    width: 50%;
+    text-align: center;
+}
+#wishlist table td:nth-child(4){
+    width: 50%;
+    text-align: center;
+}
+
+#wishlist table thead{/*styling the header, adding lines*/
+    border: 1px solid burlywood;
+    border-left: none;
+    border-right: none;
+}
+
+#wishlist table thead td{/*making font and size of text better in header*/
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 16px;
+    padding: 18px 0;
+}
+
+#wishlist table tbody tr td{/*adding spacing between main body and header*/
+    padding: 15px;
+}
+
+#wishlist table tbody td{
+    font-size: 16px;
+}
+
+.wishHeading{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 3%;
+}
+
+        /*Signup Form Styling*/
+
+#signup{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    
+}
+
+.form-container{
+    background-color: #ffffff;
+    padding: 50px;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    width: 35%;
+    
+    text-align: center;
+}
+
+.form-container h2{
+    margin-bottom: 20px;
+    font-size: 20pt;
+    color: #333;
+}
+
+.form-group{
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.form-group label{
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14pt;
+    color: #555;
+}
+
+.form-group input,
+.form-group select{
+    width: 100%;
+    padding: 10px;
+    font-size: 14pt;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.form-group button{
+    width: 50%;
+    padding: 10px;
+    font-size: 16pt;
+    background-color: burlywood;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.form-group.formBut{
+    text-align: center;
+}
+
+.form-group button:hover{
+    background-color: #d4a373;
+}
+
+.error-message{
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+}
