@@ -138,6 +138,7 @@ p{
                     /*FOR PRODUCTS*/
 
 #products{
+    margin-top: 4%;
     text-align: center;
     position: relative;
     z-index: 1;
@@ -149,6 +150,7 @@ p{
     gap: 55px;
     padding: 20px;
     flex-wrap: wrap;
+    margin-top: 3%;
 }
 
 #products .pro{
