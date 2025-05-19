@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 	include_once "config.php";
 
 class Api{
@@ -88,6 +91,26 @@ class Api{
 
 		return $rows>0;
 		
+	}
+
+	private function generateApiKey(){
+		$bytes = random_bytes(32);
+		
+		$apiKey = bin2hex($bytes);
+		
+		$conn = $this->conn;
+		$stmt = $conn->prepare("SELECT COUNT(*) FROM users WHERE Api_key = ?");
+		$stmt->bind_param("s", $apiKey);
+		$stmt->execute();
+		$stmt->bind_result($count);
+		$stmt->fetch();
+		$stmt->close();
+		
+		if($count > 0){
+			return $this->generateApiKey();
+		}
+		
+		return $apiKey;
 	}
 
 	private function addUser($name,$surname,$email,$password,$user_type){
@@ -594,7 +617,7 @@ class Api{
 
 		$email=$data['email'];
 
-		$stmt=$conn->prepare("SELECT FirstName,LastName,Api_key,password FROM users WHERE email=?");
+		$stmt=$conn->prepare("SELECT FirstName,LastName,Api_key,Password FROM users WHERE email=?");
 
 		$stmt->bind_param("s",$email);
 
