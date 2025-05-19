@@ -90,6 +90,26 @@ class Api{
 		
 	}
 
+	private function generateApiKey(){
+		$bytes = random_bytes(32);
+		
+		$apiKey = bin2hex($bytes);
+		
+		$conn = $this->conn;
+		$stmt = $conn->prepare("SELECT COUNT(*) FROM users WHERE Api_key = ?");
+		$stmt->bind_param("s", $apiKey);
+		$stmt->execute();
+		$stmt->bind_result($count);
+		$stmt->fetch();
+		$stmt->close();
+		
+		if($count > 0){
+			return $this->generateApiKey();
+		}
+		
+		return $apiKey;
+	}
+
 	private function addUser($name,$surname,$email,$password,$user_type){
 
 		$conn=$this->conn;
@@ -573,14 +593,14 @@ class Api{
 
 		$password=$data['password'];
 
-		if(!$this->userExists($this->conn,$data['email'])){
+		if(!$this->userExists($data['email'])){
 
 			$this->respond("error","User does not exist",401);
 		}
 
 		$email=$data['email'];
 
-		$stmt=$conn->prepare("SELECT FirstName,LastName,Api_key FROM users WHERE email=?");
+		$stmt=$conn->prepare("SELECT FirstName,LastName,Api_key,Password FROM users WHERE email=?");
 
 		$stmt->bind_param("s",$email);
 
