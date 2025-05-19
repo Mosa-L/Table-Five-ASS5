@@ -94,7 +94,7 @@ class Api{
 
 		$conn=$this->conn;
 
-		$add=$conn->prepare("INSERT INTO u24874478_users (Email,Password,FirstName,LastName,Type,Api_key) VALUES(?,?,?,?,?,?)");
+		$add=$conn->prepare("INSERT INTO users (Email,Password,FirstName,LastName,Type,Api_key) VALUES(?,?,?,?,?,?)");
 
 		$apikey=$this->generateApiKey();
 
@@ -496,6 +496,13 @@ class Api{
 
 	}
 
+	private function generateApiKey(){
+
+		$apiKey=substr(bin2hex(random_bytes(8)),0,16);
+
+		return $apiKey;
+	}
+
 	private function handleRegister(){
 
 		$data=$this->data;
@@ -504,7 +511,14 @@ class Api{
 		$name=null;
 		$surname=null;
 		$password=null;
-		$user_type=$data['type'];
+		$user_type=null;
+
+		if(!isset($data['user_type'])||($data['user_type']!='Customer'&&$data['user_type']!='Manager')){
+
+			$this->respond("error","Invalid or missing user type",400);
+		}
+
+		$user_type=$data['user_type'];
 
 		if(!isset($data['name'])||!$this->validateName($data['name'])){
 
@@ -553,7 +567,7 @@ class Api{
 		$email;
 		$password;
 
-		$accepted =['email','password'];
+		$accepted =['type','email','password'];
 
 		foreach($data as  $attr=>$value){
 			if(!in_array($attr,$accepted)){
@@ -563,7 +577,7 @@ class Api{
 
 		if(!isset($data['email'])||!$this->validateEmail($data['email'])){
 
-		$this->respond("error","Invalid or missing email",400);
+			$this->respond("error","Invalid or missing email",400);
 		}
 
 		if(!isset($data['password'])){
@@ -573,14 +587,14 @@ class Api{
 
 		$password=$data['password'];
 
-		if(!$this->userExists($this->conn,$data['email'])){
+		if(!$this->userExists($data['email'])){
 
 			$this->respond("error","User does not exist",401);
 		}
 
 		$email=$data['email'];
 
-		$stmt=$conn->prepare("SELECT FirstName,LastName,Api_key FROM users WHERE email=?");
+		$stmt=$conn->prepare("SELECT FirstName,LastName,Api_key,password FROM users WHERE email=?");
 
 		$stmt->bind_param("s",$email);
 
@@ -605,6 +619,24 @@ class Api{
 			
 			$this->respond('error', $stmt->error, 500);
 		}
+	}
+
+	private function getCategories(){
+
+		$conn=$this->conn;
+
+		$stmt=$conn->query("SELECT Name FROM categories");
+
+		if(!$stmt->execute()){
+
+			$this->respond('error','Failed to get categories',500);
+
+		}
+
+			$result=$stmt->get_result();
+			$categories=$result->fetch_all(MYSQLI_ASSOC);
+
+			return $categories;
 	}
 
 	public function handleRequest(){
