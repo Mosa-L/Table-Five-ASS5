@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
         loginButton.disabled = true;
         
         // Send login request to API
-        fetch('/COS221/Assignment%205/api.php', {
+        fetch('api.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
