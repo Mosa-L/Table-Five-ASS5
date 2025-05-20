@@ -440,7 +440,7 @@ class Api{
 
 			$stmt=$conn->prepare(
 				"SELECT u.FirstName, u.LastName, r.Rating, r.Comment, r.ReviewDate
-				FROM users AS u JOIN review as r ON u.UserID=r.UserID
+				FROM users AS u JOIN reviews as r ON u.UserID=r.UserID
 				WHERE ProductID=?"
 			);
 
@@ -575,18 +575,17 @@ class Api{
 		}
 
 	}
-<<<<<<< HEAD
-=======
+
 	private function handleFavourites(){//this function will add the users fav
 		
 	//probably need a an api key request 
-		if(!isset($data['apikey'])||!$this->checkApiKey($data['apikey'])){
-			http_response_code(401);
-			echo json_encode(["errror"=>"need apikey to perfrom request or invalid apikey"]);
+		if(!isset($data['apikey'])||!$this->checkApiKey($data['apikey'])){	
+			$this->respond('error',"Apikey missing or invalid",401);
 		}	
+
 		if(!isset($data['ProductID'])){
-			http_response_code(401);//we need the productID to add the correct product to the favourites table the apikey is not sufficent 
-			echo json_encode(["error" => "productID needed "]);
+			//we need the productID to add the correct product to the favourites table the apikey is not sufficent 
+			$this->respond('error',"productID missing",401);
 		}
 		$productID = $data['ProductID'];
 		$userID ;
@@ -601,9 +600,8 @@ class Api{
 		if($result && $row = $result->fetch_assoc()){
 			$userID = $row['UserID'];
 		}else{
-			http_response_code(403);
-			echo json_encode(["error" => "user not found"]);
-			exit;
+
+			$this->respond('error',"User not found",403);
 		}
 		//now that user is found we can use the userID to add to the favourites table 
 		//but product id ?
@@ -611,14 +609,13 @@ class Api{
 		$stmt->bind_param("ii", $userID, $productID);
 
 		if ($stmt->execute()) {
-			echo json_encode(["success" => "Favourite added successfully"]);
+			$this->respond('success',"Favourite added successfully",201);
 		} else {
-			http_response_code(500);
-			echo json_encode(["error" => "Failed to add favourite"]);
+
+			$this->respond('error',"Failed to add favourite",500);
 		}
 
 	}
->>>>>>> fd1fd7b (add to favourites table complete just need getFavourites)
 
 	private function handleLogin(){
 		$data=$this->data;
@@ -681,6 +678,7 @@ class Api{
 		}
 	}
 
+	//Category and Retailer get distinct
 	private function getCatOrRet($field){
 
 		$conn=$this->conn;
@@ -720,6 +718,7 @@ class Api{
 		return $values;
 	}
 	
+	//Brand and Specification get distinct
 	private function getBrandOrSpec($field){
 
 		$conn=$this->conn;
@@ -792,6 +791,76 @@ class Api{
 
 	}
 
+	private function handleAddReview(){
+
+		$data=$this->data;
+		$conn=$this->conn;
+
+		$accepted =['type','apikey','productID','rating','comment'];
+
+		foreach($data as  $attr=>$value){
+			if(!in_array($attr,$accepted)){
+				$this->respond("error","Invalid Parameter",400);
+			}
+		}
+		
+		if(!isset($data['apikey'])){
+
+			$this->respond("error","Apikey missing",400);
+		}
+
+		if(!isset($data['productID'])){
+
+			$this->respond("error","ProductID missing",400);
+		}
+
+		$productID=$data['productID'];
+
+		if(!isset($data['rating'])){
+
+			$this->respond("error","Rating missing",400);
+		}
+
+		$rating=$data['rating'];
+
+		if(!isset($data['comment'])){
+
+			$this->respond("error","Comment missing",400);
+		}
+
+		$comment=$data['comment'];
+
+		$auth=$this->checkApiKey($data['apikey']);
+
+		if(!$auth){
+
+			$this->respond('error','Access Unauthorized',401);
+		}
+
+		$getUser=$conn->prepare("SELECT UserID FROM users WHERE Api_key=?");
+
+		$getUser->bind_param("s",$data['apikey']);
+
+		$getUser->execute();
+		$getUser->store_result();
+		$getUser->bind_result($userID);
+		$getUser->close();
+
+		$stmt=$conn->prepare("INSERT INTO reviews(UserID, ProductID, Rating, Comment, ReviewDate) VALUES(?,?,?,?,NOW())");
+
+		$stmt->bind_param("iiis",$userID,$productID,$rating,$comment);
+
+		if(!$stmt->execute()){
+
+			$this->respond('error','Could not make review',500);
+		}
+
+		$stmt->close();
+
+		$this->respond('success','Review Added',200);
+
+	}
+
 	public function handleRequest(){
 
 		$data=$this->data;
@@ -830,6 +899,10 @@ class Api{
 
 				case "Save":
 					$this->handleSave();
+					break;
+
+				case "AddReview":
+					$this->handleAddReview();
 					break;
 
 				default:
