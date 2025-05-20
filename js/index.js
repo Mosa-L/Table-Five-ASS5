@@ -24,11 +24,11 @@ if (apiKey){
     logoutA.textContent = 'Logout';
     logoutLi.appendChild(logoutA);
     navBar.appendChild(logoutLi);
-    
+
     //clear apikey and redirect to index
     logoutA.addEventListener('click', function(e){
         e.preventDefault();
-        localStorage.removeItem('apikey');
+        localStorage.clear();
         window.location.href = 'index.html';
     });
 }
