@@ -568,6 +568,50 @@ class Api{
 		}
 
 	}
+<<<<<<< HEAD
+=======
+	private function handleFavourites(){//this function will add the users fav
+		
+	//probably need a an api key request 
+		if(!isset($data['apikey'])||!$this->checkApiKey($data['apikey'])){
+			http_response_code(401);
+			echo json_encode(["errror"=>"need apikey to perfrom request or invalid apikey"]);
+		}	
+		if(!isset($data['ProductID'])){
+			http_response_code(401);//we need the productID to add the correct product to the favourites table the apikey is not sufficent 
+			echo json_encode(["error" => "productID needed "]);
+		}
+		$productID = $data['ProductID'];
+		$userID ;
+		$apikey = $data['apikey'];
+
+
+		$stmt = $conn->prepare("SELECT UserID FROM users WHERE Api_key = ?");
+		$stmt->bind_param("s", $apikey);
+		$stmt->execute();
+		$result = $stmt->get_result();
+
+		if($result && $row = $result->fetch_assoc()){
+			$userID = $row['UserID'];
+		}else{
+			http_response_code(403);
+			echo json_encode(["error" => "user not found"]);
+			exit;
+		}
+		//now that user is found we can use the userID to add to the favourites table 
+		//but product id ?
+		$stmt = $conn->prepare("INSERT INTO favourites (UserID, productId, date_added) VALUES (?, ?, NOW())");
+		$stmt->bind_param("ii", $userID, $productID);
+
+		if ($stmt->execute()) {
+			echo json_encode(["success" => "Favourite added successfully"]);
+		} else {
+			http_response_code(500);
+			echo json_encode(["error" => "Failed to add favourite"]);
+		}
+
+	}
+>>>>>>> fd1fd7b (add to favourites table complete just need getFavourites)
 
 	private function handleLogin(){
 		$data=$this->data;
