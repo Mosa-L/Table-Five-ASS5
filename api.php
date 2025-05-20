@@ -1,7 +1,7 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
 	include_once "config.php";
 
 class Api{
@@ -213,7 +213,7 @@ class Api{
 
 		$validFields=['ProductID', 'Title', 'Brand', 'Description', 'Image_url'];
 
-		$sortFields=['Product','Title','Brand'];
+		$sortFields=['ProductID','Title','Brand'];
 		$sortDir=['ASC','DESC'];
 		$searchFields=['ProductID', 'Title', 'Brand'];
 
@@ -304,6 +304,9 @@ class Api{
 			$query.=" LIMIT $limit";
 		}
 
+		error_log($query);
+		error_log(print_r($values, true));
+
 		$productStmt=$conn->prepare($query);
 
 		if($prepare){
@@ -327,6 +330,7 @@ class Api{
 	private function handleGetAllProducts(){
 
 		$data=$this->data;
+		$conn=$this->conn;
 
 		if(!isset($data['apikey'])){
 
@@ -605,7 +609,7 @@ class Api{
 		}
 		//now that user is found we can use the userID to add to the favourites table 
 		//but product id ?
-		$stmt = $conn->prepare("INSERT INTO favourites (UserID, productId, date_added) VALUES (?, ?, NOW())");
+		$stmt = $conn->prepare("INSERT INTO favourites (UserID, ProductId, Date_Added) VALUES (?, ?, NOW())");
 		$stmt->bind_param("ii", $userID, $productID);
 
 		if ($stmt->execute()) {
@@ -774,13 +778,13 @@ class Api{
 
 			case "Retailer":
 			case "Category":
-				$values=getCatOrRet($field);
+				$values=$this->getCatOrRet($field);
 				$this->respond('success',$values,200);
 				break;
 			
 			case "Brand":
 			case "Specification":
-				$values=getBrandOrSpec($field);
+				$values=$this->getBrandOrSpec($field);
 				$this->respond('success',$values,200);
 				break;
 
