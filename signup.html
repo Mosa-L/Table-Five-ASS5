@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CompareIt - Signup</title>
+    <link rel="stylesheet" href="./style.css"/>
+    <script src="https://kit.fontawesome.com/a8501f958b.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div id="header" class="section-padding">
+        <img class="navlogo" src="./images/COMPAREIT Logo - Black with Transparent Background.svg" alt="CompareIt Logo"/>
+        <ul id="navbar">
+            <li><a href="index.html"><i class="fa-solid fa-house"></i></a></li>
+            <li><a href="compare.html">Compare</a></li>
+            <li><a href="favourites.html">Favourites</a></li>
+            <!--<li><a href="cart.html"><i class="fa-solid fa-bag-shopping"></i></a></li>-->
+            <li><a href="login.html">Login</a></li>
+            <li><a class="active" href="signup.html">Signup</a></li>
+        </ul>
+    </div>
+
+    <section id="signup">
+        <div class="form-container">
+            <h2>Create Your Account</h2>
+            <form id="signupForm" action="index.html" method="post">
+                <div class="form-group">
+                    <label for="name">Full Name:</label>
+                    <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password:</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required>
+                </div>
+                <div class="form-group formBut">
+                    <button type="submit" id="signupButton">Signup</button>
+                </div>
+                <p id="errorMessage" class="error-message"></p>
+            </form>
+        </div>
+    </section>
+</body>
+</html>
