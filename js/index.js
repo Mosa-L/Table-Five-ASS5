@@ -1,6 +1,37 @@
 var API_URL = './api.php';
 var apiKey = localStorage.getItem('apikey') || 'sente/lesedi apikey'; //stored api key or default
 var productContainer = document.querySelector('.proCont');  //container where products go
+var navBar = document.getElementById('header');
+
+//-----------If user is logged in...-----------------
+if (apiKey){
+    //remove login button
+    var loginLink = navBar.querySelector('a[hred="login.html"]');
+    if (loginLink){
+        navBar.removeChild(loginLink.parentNode);
+    }
+
+    //remove signup button
+    var signupLink = navBar.querySelector('a[href="signup.html"]');
+    if (signupLink){
+        navBar.removeChild(signupLink.parentNode);
+    }
+
+    //adds logout button
+    var logoutLi = document.createElement('li');
+    var logoutA = document.createElement('a');
+    logoutA.href = '#';
+    logoutA.textContent = 'Logout';
+    logoutLi.appendChild(logoutA);
+    navBar.appendChild(logoutLi);
+    
+    //clear apikey and redirect to index
+    logoutA.addEventListener('click', function(e){
+        e.preventDefault();
+        localStorage.removeItem('apikey');
+        window.location.href = 'index.html';
+    });
+}
 
 function fetchAndRenderProducts(options){
     options = options || {};
@@ -75,8 +106,15 @@ function fetchAndRenderProducts(options){
             '<div class = "description">' + '<h5>' + p.Title + '</h5>' + '<h4>From R' + (p.LowestPrice ? p.LowestPrice.toLocaleString() : '-')
             + '</h4>' + '</div>' + '<a href="compare.html"> i class= "fa-solid fa-arrow-right-arrow-left compare"></i></a>' +
             '<a href= "favourites.html"><i class = "fa-regular fa-heart favourites"></i></a>';
+            //event listener to go to view page
+            (function(pid){
+                card.addEventListener('click', function(){
+                    window.location.href = 'view.html?productID=' + pid;
+                });
+            })(p.ProductID);
+
             productContainer.appendChild(card);
-            
+
         }
     }
 
