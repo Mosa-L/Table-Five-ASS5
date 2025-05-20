@@ -102,16 +102,17 @@ function fetchAndRenderProducts(options){
             var p = products[i];
             var card = document.createElement('div');
             card.className = 'pro';
+
             card.innerHTML = '<img src="' + p.Image_url + '" alt = "' + p.Title + '">' +
             '<div class = "description">' + '<h5>' + p.Title + '</h5>' + '<h4>From R' + (p.LowestPrice ? p.LowestPrice.toLocaleString() : '-')
-            + '</h4>' + '</div>' + '<a href="compare.html"> i class= "fa-solid fa-arrow-right-arrow-left compare"></i></a>' +
+            + '</h4>' + '</div>' + '<a href="compare.html"><i class= "fa-solid fa-arrow-right-arrow-left compare"></i></a>' +
             '<a href= "favourites.html"><i class = "fa-regular fa-heart favourites"></i></a>';
             //event listener to go to view page
-            (function(pid){
-                card.addEventListener('click', function(){
+            (function(pid, el){
+                el.addEventListener('click', function(){
                     window.location.href = 'view.html?productID=' + pid;
                 });
-            })(p.ProductID);
+            })(p.ProductID, card);
 
             productContainer.appendChild(card);
 
@@ -123,8 +124,8 @@ function fetchAndRenderProducts(options){
 document.addEventListener("DOMContentLoaded", function() {
     fetchAndRenderProducts();
     //search button
-    document.getElementById('searchBtn').addEventListener('click', function (){
-        var text = document.getElementById('searchInput').ariaValueMax.trim();
+    document.getElementById('searchBut').addEventListener('click', function (){
+        var text = document.getElementById('searchInput').value.trim();
         fetchAndRenderProducts({
             search: {
                 text: text
