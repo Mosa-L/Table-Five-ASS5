@@ -519,13 +519,6 @@ class Api{
 
 	}
 
-	private function generateApiKey(){
-
-		$apiKey=substr(bin2hex(random_bytes(8)),0,16);
-
-		return $apiKey;
-	}
-
 	private function handleRegister(){
 
 		$data=$this->data;
@@ -644,22 +637,115 @@ class Api{
 		}
 	}
 
-	private function getCategories(){
+	private function getCatOrRet($field){
 
 		$conn=$this->conn;
 
-		$stmt=$conn->query("SELECT Name FROM categories");
+		$values=[];
 
-		if(!$stmt->execute()){
+		if($field=='Category'){
 
-			$this->respond('error','Failed to get categories',500);
+			$result=$conn->query("SELECT CategoryID, Name FROM categories");
+
+			if(!$result){
+
+				$this->respond('error','Failed to get categories',500);
+			}
+
+			while($row=$result->fetch_assoc()){
+
+				$values[$row['CategoryID']]=$row['Name'];
+			}
+
+		}else if($field=='Retailer'){
+
+			$result=$conn->query("SELECT RetailerID, RetailerName FROM retailers");
+
+			if(!$result){
+
+				$this->respond('error','Failed to get retailers',500);
+			}
+
+			while($row=$result->fetch_assoc()){
+
+				$values[$row['RetailerID']]=$row['RetailerName'];
+			}
 
 		}
 
-			$result=$stmt->get_result();
-			$categories=$result->fetch_all(MYSQLI_ASSOC);
+		return $values;
+	}
+	
+	private function getBrandOrSpec($field){
 
-			return $categories;
+		$conn=$this->conn;
+
+		$values=[];
+
+		if($field=='Brand'){
+
+			$result=$conn->query("SELECT DISTINCT Brand FROM products");
+
+			if(!$result){
+
+				$this->respond('error','Failed to get brands',500);
+			}
+
+			while($row=$result->fetch_assoc()){
+
+				$values[]=$row['Brand'];
+			}
+
+
+		}else if($field=='Specification'){
+
+			$result=$conn->query("SELECT DISTINCT SpecType FROM specifications");
+
+			if(!$result){
+
+				$this->respond('error','Failed to get specifications',500);
+			}
+
+			while($row=$result->fetch_assoc()){
+
+				$values[]=$row['SpecType'];
+			}
+
+		}
+
+		return $values;
+	}
+
+	private function handleGetDistinct(){
+
+		$data=$this->data;
+
+		if(!isset($data['field'])){
+
+			$this->respond('error','field parameter missing',400);
+		}
+
+		$field=$data['field'];
+
+		switch($field){
+
+			case "Retailer":
+			case "Category":
+				$values=getCatOrRet($field);
+				$this->respond('success',$values,200);
+				break;
+			
+			case "Brand":
+			case "Specification":
+				$values=getBrandOrSpec($field);
+				$this->respond('success',$values,200);
+				break;
+
+			default:
+				$this->respond('error','Invalid field',400);
+
+		}
+
 	}
 
 	public function handleRequest(){
@@ -692,6 +778,10 @@ class Api{
 
 				case "GetFavourites":
 					$this->handleFavouriteProducts();
+					break;
+
+				case "GetDistinct":
+					$this->handleGetDistinct();
 					break;
 
 				case "Save":
