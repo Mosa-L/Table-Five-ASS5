@@ -620,6 +620,46 @@ class Api{
 		}
 
 	}
+	private function handleFavouriteProducts(){
+		//will return an array of productids and then they can be used in the product table to return the persons favourite
+		//the apikey should be sufficient in this case  
+		if(!isset($data['apikey'])||!$this->checkApiKey($data['apikey'])){
+			http_response_code(403);
+			echo json_encod(["error" =>"missing key or invlaid apikey"]);
+		}
+		$stmt = $conn->prepare("SELECT UserID FROM users WHERE Api_key = ?");
+		$stmt->bind_param("s", $apikey);
+		$stmt->execute();
+		$result = $stmt->get_result();
+
+		if($result && $row = $result->fetch_assoc()){
+			$userID = $row['UserID'];
+		}else{
+			http_response_code(403);
+			echo json_encode(["error" => "user not found"]);
+			exit;
+		}
+
+
+    $userID = $row['UserID'];
+
+    $stmt = $conn->prepare("
+        SELECT p.* 
+        FROM favourites f 
+        JOIN products p ON p.ProductID = f.ProductID 
+        WHERE f.UserID = ?
+    ");
+    $stmt->bind_param("i", $userID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $favouriteProducts = [];
+    while ($row = $result->fetch_assoc()) {
+        $favouriteProducts[] = $row;
+    }
+
+
+	}
 
 	private function handleLogin(){
 		$data=$this->data;
