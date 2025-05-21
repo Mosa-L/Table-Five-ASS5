@@ -625,14 +625,16 @@ class Api{
 	}
 	private function handleFavouriteProducts(){
 		//will return an array of productids and then they can be used in the product table to return the persons favourite
-		//the apikey should be sufficient in this case  
-		if(!isset($data['apikey'])||!$this->checkApiKey($data['apikey'])){
+		//the apikey should be sufficient in this case 
+		$data = $this->data;//added this to make work 
+		$conn = $this->conn; 
+		if(!isset($data['apikey'])|| !$this->checkApiKey($data['apikey'])){
 			
 			$this->respond('error',"Missing or Invalid apikey",403);
 		}
 
 		$stmt = $conn->prepare("SELECT UserID FROM users WHERE Api_key = ?");
-		$stmt->bind_param("s", $apikey);
+		$stmt->bind_param("s", $data['apikey']);
 		$stmt->execute();
 		$result = $stmt->get_result();
 
@@ -663,6 +665,42 @@ class Api{
 
 		$this->respond('success',$favouriteProducts,200);
 		
+	}
+
+	private function handleRemoveFavourite(){
+		//removes a single item from the favourites table 
+		//will prob need the productID and apikey 
+		$conn = $this->conn;
+		$data = $this->data;
+
+		if(!isset($data['apikey'])||!$this->checkApiKey($data['apikey'])){
+			$this->respond('error',"Missing or Invalid apikey",403);
+		}
+		if(!isset($data['ProductID'])){
+    	$this->respond('error', "Missing ProductID", 400);
+		}
+		$stmt = $conn->prepare("SELECT UserID FROM users WHERE Api_key = ?");
+		$stmt->bind_param("s", $data['apikey']);
+		$stmt->execute();
+		$result = $stmt->get_result();
+
+		if($result && $row = $result->fetch_assoc()){
+			$userID = $row['UserID'];
+		}else{
+			
+			$this->respond('error',"User not found",403);
+		}
+
+		//now that you have userID how to go about deletion ?
+		$stmt = $conn->prepare("DELETE FROM favourites WHERE UserID = ? AND ProductID = ?");
+		$stmt->bind_param("ii", $userID,$data['ProductID']);
+		$stmt->execute();
+
+		if($stmt->affected_rows > 0){
+    	$this->respond('success', "Product removed from favourites", 200);
+		}else{
+    	$this->respond('error', "Product not found in favourites", 404);
+		}
 	}
 
 	private function handleLogin(){
@@ -940,6 +978,10 @@ class Api{
 
 				case "GetFavourites":
 					$this->handleFavouriteProducts();
+					break;
+
+				case "removeFavourite":
+					$this->handleRemoveFavourite();
 					break;
 
 				case "GetDistinct":
