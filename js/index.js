@@ -4,17 +4,31 @@ var productContainer = document.querySelector('.proCont');  //container where pr
 var navBar = document.getElementById('header');
 
 //-----------If user is logged in...-----------------
-if (apiKey){
+if (apiKey && apiKey !== '3a160d66562032f9'){
     //remove login button
-    var loginLink = navBar.querySelector('a[hred="login.html"]');
+    var loginLink = navBar.querySelector('a[href="login.html"]');
     if (loginLink){
-        navBar.removeChild(loginLink.parentNode);
+        var li = loginLink.parentNode;
+        li.parentNode.removeChild(li);
     }
 
     //remove signup button
     var signupLink = navBar.querySelector('a[href="signup.html"]');
     if (signupLink){
-        navBar.removeChild(signupLink.parentNode);
+        var li2 = signupLink.parentNode;
+        li2.removeChild(li2);
+    }
+    //add greeting
+    var storedname = localStorage.getItem('name');
+    if (storedname){
+        var greetingLi = document.createElement('li');
+        var greetSpan = document.createElement('span');
+        greetSpan.textContent = 'Hello, ' + storedname + '!';
+        greetSpan.style.marginRight = '1em';
+        greetingLi.appendChild(greetSpan);
+
+        var navBar = document.getElementById('header');
+        navBar.insertBefore(greetingLi, navBar.firstChild);
     }
 
     //adds logout button
@@ -35,6 +49,13 @@ if (apiKey){
 
 function fetchAndRenderProducts(options){
     options = options || {};
+
+    // var apiKey = localStorage.getItem('apikey');
+    // if (!apiKey){
+    //     window.location.href = 'login.html';
+    //     return;
+    // }
+
     var payload = {
         type: 'GetAllProducts',
         apikey: apiKey,
@@ -69,30 +90,33 @@ function fetchAndRenderProducts(options){
     var xhr = new XMLHttpRequest();
     xhr.open('POST', API_URL, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onreadystatechange = function(){
-        if (xhr.readyState !== 4){
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState !== 4) return;
+
+        var raw = xhr.responseText.trim();
+        var resp;
+
+        // Try parsing JSON
+        try {
+            resp = JSON.parse(raw);
+        } catch (e) {
+            // Failed—so log the full HTML payload for diagnosis
+            console.error('❌ Non-JSON response from API:', raw);
+            productContainer.innerHTML =
+            '<p class="error">Server error loading products; check console.</p>';
             return;
         }
-        if (xhr.status >= 200 && xhr.status < 300){
-            try{
-                var resp = JSON.parse(xhr.responseText);
-                if (resp.status === 'success'){
-                    renderProducts(resp.data);
-                }
-                else{
-                    throw new Error(typeof resp.data === 'string' ? resp.data : JSON.stringify(resp.data));
-                }
-            }
-            catch (e){
-                console.error('Failed to handlle the response: ', e);
-                productContainer.innerHTML = '< p class = "error">Sorry, could not load products.</p>';
-            }
-        }
-        else{
-            console.error('API returned HTTP ' + xhr.status);
-            productContainer.innerHTML = '<p class = "error">Sorry, could not load products.</p>';
+
+        // Now you know resp is a JS object
+        if (resp.status === 'success') {
+            renderProducts(resp.data);
+        } else {
+            console.error('API error:', resp.data);
+            productContainer.innerHTML =
+            '<p class="error">Error: ' + resp.data + '</p>';
         }
     };
+
     xhr.send(JSON.stringify(payload));
 
     //Clear product container and append new cards

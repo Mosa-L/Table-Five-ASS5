@@ -9,6 +9,49 @@ document.addEventListener('DOMContentLoaded', function (){
     fetchAndRenderFavourites();
 });
 
+if (apiKey && apiKey !== '3a160d66562032f9'){
+    //remove login button
+    var loginLink = navBar.querySelector('a[href="login.html"]');
+    if (loginLink){
+        var li = loginLink.parentNode;
+        li.parentNode.removeChild(li);
+    }
+
+    //remove signup button
+    var signupLink = navBar.querySelector('a[href="signup.html"]');
+    if (signupLink){
+        var li2 = signupLink.parentNode;
+        li2.removeChild(li2);
+    }
+    //add greeting
+    var storedname = localStorage.getItem('name');
+    if (storedname){
+        var greetingLi = document.createElement('li');
+        var greetSpan = document.createElement('span');
+        greetSpan.textContent = 'Hello, ' + storedname + '!';
+        greetSpan.style.marginRight = '1em';
+        greetingLi.appendChild(greetSpan);
+
+        var navBar = document.getElementById('header');
+        navBar.insertBefore(greetingLi, navBar.firstChild);
+    }
+
+    //adds logout button
+    var logoutLi = document.createElement('li');
+    var logoutA = document.createElement('a');
+    logoutA.href = '#';
+    logoutA.textContent = 'Logout';
+    logoutLi.appendChild(logoutA);
+    navBar.appendChild(logoutLi);
+
+    //clear apikey and redirect to index
+    logoutA.addEventListener('click', function(e){
+        e.preventDefault();
+        localStorage.clear();
+        window.location.href = 'favourites.html';
+    });
+}
+
 //fetching users favs from api and rendering them
 function fetchAndRenderFavourites(){
     var xhr = new XMLHttpRequest();
