@@ -848,6 +848,7 @@ class Api{
 		$getUser->execute();
 		$getUser->store_result();
 		$getUser->bind_result($userID);
+		$getUser->fetch();
 		$getUser->close();
 
 		$stmt=$conn->prepare("INSERT INTO reviews(UserID, ProductID, Rating, Comment, ReviewDate) VALUES(?,?,?,?,NOW())");
