@@ -10,8 +10,6 @@
 <body>
     <!-- Navigation Bar -->
     <div id="header" class="section-padding">
-       
-        <!-- Use SVG logo for CompareIt -->
         <img class="navlogo" src="./images/COMPAREIT Logo - Black with Transparent Background.svg" alt="CompareIt Logo"/>
         <ul id="navbar">
             <li><a href="index.html"><i class="fa-solid fa-house"></i></a></li>
@@ -20,106 +18,15 @@
             <!--<li><a href="cart.html"><i class="fa-solid fa-bag-shopping"></i></a></li>-->
             <li><a href="login.html">Login</a></li>
         </ul>
-        
     </div>
 
     <!-- Compare Grid Layout -->
     <section id="compare-grid">
         <div class="compare-container">
-            <!-- Main product box -->
-            <div class="compare-product main-product">
-                <img src="./images/COMPAREIT Logo - Original - 5000x5000.png" alt="Dell Inspiron 15"/>
-                <div class="compare-desc">
-                    <h4>Dell Inspiron 15</h4>
-                    <p>From R13 000</p>
-                    <!-- Add more product details as needed -->
-                </div>
-            </div>
-            <!-- Add product boxes (up to 3) -->
-            <div class="compare-product add-product">
-                <i class="fa-solid fa-plus"></i>
-                <span>Add Product</span>
-            </div>
-            <div class="compare-product add-product">
-                <i class="fa-solid fa-plus"></i>
-                <span>Add Product</span>
-            </div>
-            <div class="compare-product add-product">
-                <i class="fa-solid fa-plus"></i>
-                <span>Add Product</span>
-            </div>
+            <!-- Populated by JS -->
         </div>
+        <!-- Comparison table will be added by JS -->
     </section>
-
-    <!-- Stylish Comparison Table -->
-    <section id="compare-table-section">
-        <div class="compare-table-container">
-            <table class="compare-table">
-                <thead>
-                    <tr>
-                        <th>Attribute</th>
-                        <th>
-                            <div class="compare-table-header">
-                                <img src="./images/COMPAREIT Logo - Original - 5000x5000.png" alt="Dell Inspiron 15"/>
-                                <span>Dell Inspiron 15</span>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="compare-table-header">
-                                <img src="./images/COMPAREIT Logo - White with Black Background - 5000x5000 (1).png" alt="Samsung Galaxy S23"/>
-                                <span>Samsung Galaxy S23</span>
-                            </div>
-                        </th>
-                        <!-- Add more <th> if more products are compared -->
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Price</td>
-                        <td>R13 000</td>
-                        <td>R16 000</td>
-                    </tr>
-                    <tr>
-                        <td>Retailers</td>
-                        <td>
-                            <ul class="retailer-list">
-                                <li>Takealot</li>
-                                <li>Makro</li>
-                                <li>Incredible Connection</li>
-                            </ul>
-                        </td>
-                        <td>
-                            <ul class="retailer-list">
-                                <li>Takealot</li>
-                                <li>Vodacom</li>
-                                <li>MTN</li>
-                            </ul>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>CPU</td>
-                        <td>Intel Core i5</td>
-                        <td>Snapdragon 8 Gen 2</td>
-                    </tr>
-                    <tr>
-                        <td>RAM</td>
-                        <td>8GB</td>
-                        <td>8GB</td>
-                    </tr>
-                    <tr>
-                        <td>Storage</td>
-                        <td>512GB SSD</td>
-                        <td>256GB</td>
-                    </tr>
-                    <tr>
-                        <td>Screen</td>
-                        <td>15.6" FHD</td>
-                        <td>6.1" AMOLED</td>
-                    </tr>
-                    <!-- Add more attributes as needed -->
-                </tbody>
-            </table>
-        </div>
-    </section>
+    <script src="js/compare.js"></script>
 </body>
 </html>
