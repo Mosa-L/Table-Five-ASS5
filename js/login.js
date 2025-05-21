@@ -54,7 +54,11 @@ document.addEventListener('DOMContentLoaded', function() {
             loginButton.disabled = false;
             
             if(data.status === "success"){
-                localStorage.setItem('user', JSON.stringify(data.data[0]));
+
+				let user=data.data[0];
+                localStorage.setItem('apikey', user.apikey);
+				localStorage.setItem('name', user.name);
+				localStorage.setItem('surname', user.surname);
                 
                 errorMessage.textContent = "Login successful!";
                 errorMessage.style.color = "green";

@@ -1,15 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Get user API key from localStorage (if available)
-    let apiKey = null;
-    const user = localStorage.getItem('user');
-    if(user){
-        try {
-            const userData = JSON.parse(user);
-            apiKey = userData.apikey;
-        } catch (e){
-            console.error('Error parsing user data', e);
-        }
-    }
+    //let apiKey = null;
+    const apiKey = localStorage.getItem('apikey');
+    // if(apikey){
+    //     try {
+            
+    //     } catch (e){
+    //         console.error('Error parsing user data', e);
+    //     }
+    // }
 
     // If no API key, redirect to login
     if(!apiKey){
@@ -192,6 +191,15 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
         
+		// Remove comparison table if no products left
+		if(compareList.length === 0){
+			const existingTable = document.querySelector('.comparison-table-container');
+			if(existingTable){
+				existingTable.remove();
+			}
+			return; 
+		}
+
         // If we have products to compare, add comparison table
         if(compareList.length > 0){
             renderComparisonTable();

@@ -11,13 +11,14 @@ document.addEventListener('DOMContentLoaded', function(){
     }
 
     //API key from localStorage (if user is logged in)
-    let apiKey = null;
-    const user = localStorage.getItem('user');
-    if(user){
-        try{
-            apiKey = JSON.parse(user).apikey;
-        } catch (e) {}
-    }
+    // let apiKey = null;
+    // const user = localStorage.getItem('apikey');
+    // if(user){
+    //     try{
+    //         apiKey = JSON.parse(user).apikey;
+    //     } catch (e) {}
+    // }
+	const apiKey = localStorage.getItem('apikey');
 
     // Fetch product info
     fetch('api.php', {

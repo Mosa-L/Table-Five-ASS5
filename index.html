@@ -14,104 +14,37 @@
         <!-- Use SVG logo for CompareIt -->
         <img class="navlogo" src="./images/COMPAREIT Logo - Black with Transparent Background.svg" alt="CompareIt Logo"/>
         <ul id="navbar">
-            <li><a class="active" href="index.html"><i class="fa-solid fa-house"></i></a></li>
+            <li><a href="index.html"><i class="fa-solid fa-house"></i></a></li>
             <li><a href="compare.html">Compare</a></li>
             <li><a href="favourites.html">Favourites</a></li>
             <!--<li><a href="cart.html"><i class="fa-solid fa-bag-shopping"></i></a></li>-->
-            <li><a href="login.html">Login</a></li>
+			<li><a href="signup.html">Signup</a></li>
+            <li><a class="active" href="login.html">Login</a></li>
         </ul>
         
     </div>
 
-    <!-- Main Content -->
-    <section id="products">
-        <h2>
-            Welcome to CompareIt!<br>
-            Your smart price comparison tool 🛒
-        </h2>
-        <h4>Find the best deals across top stores!</h4>
-        <p>
-            Compare prices, features, and reviews for thousands of products.<br>
-            Save money and shop smarter with <strong>CompareIt</strong>
-        </p>
+   
 
-        <!-- Search Bar -->
-        <div class="searchCont">
-            <input type="text" id="searchInput" placeholder="Search for products, brands, or categories...">
-            <button id="searchBut"><i class="fa-solid fa-magnifying-glass"></i></button>
-        </div>
-
-        <!-- Filters and Sort -->
-        <div class="filters">
-            <select id="category">
-                <option value="">All Categories</option>
-                <option value="electronics">Electronics</option>
-                <option value="appliances">Appliances</option>
-                <option value="fashion">Fashion</option>
-            </select>
-            <select id="price">
-                <option value="">Sort Price</option>
-                <option value="low">Low to High</option>
-                <option value="high">High to Low</option>
-            </select>
-        </div>
-
-        <!-- Example Product Cards -->
-        <div class="proCont">
-            <!-- Example product card, repeat as needed -->
-            <div class="pro">
-                <img src="./images/COMPAREIT Logo - Black with Transparent Background - 5000x5000.png" alt="Laptop">
-                <div class="description">
-                    <h5>Dell Inspiron 15</h5>
-                    <h4>From R13 000</h4>
+    <section id="signup">
+        <div class="form-container">
+            <h2>Login to Your Account</h2>
+            <form id="loginForm" action="index.html" method="post">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email">
                 </div>
-                <a href="compare.html"><i class="fa-solid fa-arrow-right-arrow-left compare"></i></a>
-                <a href="favourites.html"><i class="fa-regular fa-heart favourites"></i></a>
-                <!--<a href="cart.html"><i class="fa-solid fa-bag-shopping cart"></i></a>-->
-            </div>
-            <div class="pro">
-                <img src="./images/COMPAREIT Logo - Black with White Background - 5000x5000.png" alt="Smartphone">
-                <div class="description">
-                    <h5>Samsung Galaxy S23</h5>
-                    <h4>From R16 000</h4>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password">
                 </div>
-                <a href="compare.html"><i class="fa-solid fa-arrow-right-arrow-left compare"></i></a>
-                <a href="favourites.html"><i class="fa-regular fa-heart favourites"></i></a>
-                <!--<a href="cart.html"><i class="fa-solid fa-bag-shopping cart"></i></a>-->
-            </div>
-            <div class="pro">
-                <img src="./images/COMPAREIT Logo - Original - 5000x5000.png" alt="Headphones">
-                <div class="description">
-                    <h5>Sony WH-1000XM4</h5>
-                    <h4>From R10 000</h4>
+                <div class="form-group formBut">
+                    <button type="submit" id="loginButton">Login</button>
                 </div>
-                <a href="compare.html"><i class="fa-solid fa-arrow-right-arrow-left compare"></i></a>
-                <a href="favourites.html"><i class="fa-regular fa-heart favourites"></i></a>
-                <!--<a href="cart.html"><i class="fa-solid fa-bag-shopping cart"></i></a>-->
-            </div>
-            <div class="pro">
-                <img src="./images/COMPAREIT Logo - Original with Transparent Background - 5000x5000.png" alt="Headphones">
-                <div class="description">
-                    <h5>Sony WH-1000XM4</h5>
-                    <h4>From R10 000</h4>
-                </div>
-                <a href="compare.html"><i class="fa-solid fa-arrow-right-arrow-left compare"></i></a>
-                <a href="favourites.html"><i class="fa-regular fa-heart favourites"></i></a>
-                <!--<a href="cart.html"><i class="fa-solid fa-bag-shopping cart"></i></a>-->
-            </div>
-            <div class="pro">
-                <img src="./images/COMPAREIT Logo - White with Black Background - 5000x5000.png" alt="Headphones">
-                <div class="description">
-                    <h5>Sony WH-1000XM4</h5>
-                    <h4>From R10 000</h4>
-                </div>
-                <a href="compare.html"><i class="fa-solid fa-arrow-right-arrow-left compare"></i></a>
-                <a href="favourites.html"><i class="fa-regular fa-heart favourites"></i></a>
-                <!--<a href="cart.html"><i class="fa-solid fa-bag-shopping cart"></i></a>-->
-            </div>
-            <!-- ...add more product cards as needed... -->
+                <p id="errorMessage" class="error-message"></p>
+            </form>
         </div>
     </section>
-    <script src="js/index.js"></script>
+	<script src="js/login.js"></script>
 </body>
 </html>
