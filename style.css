@@ -535,6 +535,7 @@ button.checkBut{/*For the checkout button*/
     box-shadow: 0 8px 24px rgba(0,0,0,0.12);
 }
 
+.compare-product img,
 .compare-product.main-product img {
     width: 80%;
     height: 180px;
@@ -631,6 +632,17 @@ button.checkBut{/*For the checkout button*/
 
 .compare-table tr:last-child td {
     border-bottom: none;
+}
+
+.search-result-item img {
+    width: 80px !important; 
+    height: 80px !important;
+    object-fit: contain;
+    border-radius: 10px;
+    background: #f7f7f7;
+    margin-right: 15px;
+    display: inline-block;
+    vertical-align: middle;
 }
 
 .retailer-list {
