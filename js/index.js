@@ -1,5 +1,5 @@
 var API_URL = './api.php';
-var apiKey = localStorage.getItem('apikey') || 'sente/lesedi apikey'; //stored api key or default
+var apiKey = localStorage.getItem('apikey') || '3a160d66562032f9'; //stored api key or default
 var productContainer = document.querySelector('.proCont');  //container where products go
 var navBar = document.getElementById('header');
 
