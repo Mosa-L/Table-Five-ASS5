@@ -582,6 +582,8 @@ class Api{
 
 	private function handleFavourites(){//this function will add the users fav
 		
+		$data=$this->data;
+		$conn=$this->conn;
 	//probably need a an api key request 
 		if(!isset($data['apikey'])||!$this->checkApiKey($data['apikey'])){	
 			$this->respond('error',"Apikey missing or invalid",401);
@@ -591,6 +593,7 @@ class Api{
 			//we need the productID to add the correct product to the favourites table the apikey is not sufficent 
 			$this->respond('error',"productID missing",401);
 		}
+
 		$productID = $data['ProductID'];
 		$userID ;
 		$apikey = $data['apikey'];
@@ -624,9 +627,10 @@ class Api{
 		//will return an array of productids and then they can be used in the product table to return the persons favourite
 		//the apikey should be sufficient in this case  
 		if(!isset($data['apikey'])||!$this->checkApiKey($data['apikey'])){
-			http_response_code(403);
-			echo json_encod(["error" =>"missing key or invlaid apikey"]);
+			
+			$this->respond('error',"Missing or Invalid apikey",403);
 		}
+
 		$stmt = $conn->prepare("SELECT UserID FROM users WHERE Api_key = ?");
 		$stmt->bind_param("s", $apikey);
 		$stmt->execute();
@@ -635,30 +639,30 @@ class Api{
 		if($result && $row = $result->fetch_assoc()){
 			$userID = $row['UserID'];
 		}else{
-			http_response_code(403);
-			echo json_encode(["error" => "user not found"]);
-			exit;
+			
+			$this->respond('error',"User not found",403);
 		}
 
 
-    $userID = $row['UserID'];
+		$stmt = $conn->prepare("
+			SELECT p.* 
+			FROM favourites f 
+			JOIN products p ON p.ProductID = f.ProductID 
+			WHERE f.UserID = ?
+		");
+		$stmt->bind_param("i", $userID);
+		$stmt->execute();
+		$result = $stmt->get_result();
 
-    $stmt = $conn->prepare("
-        SELECT p.* 
-        FROM favourites f 
-        JOIN products p ON p.ProductID = f.ProductID 
-        WHERE f.UserID = ?
-    ");
-    $stmt->bind_param("i", $userID);
-    $stmt->execute();
-    $result = $stmt->get_result();
+		$favouriteProducts = [];
+		while ($row = $result->fetch_assoc()) {
+			$favouriteProducts[] = $row;
+		}
 
-    $favouriteProducts = [];
-    while ($row = $result->fetch_assoc()) {
-        $favouriteProducts[] = $row;
-    }
+		$stmt->close();
 
-
+		$this->respond('success',$favouriteProducts,200);
+		
 	}
 
 	private function handleLogin(){
