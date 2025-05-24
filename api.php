@@ -703,6 +703,107 @@ class Api{
 		}
 	}
 
+	private function handleAddProduct(){
+		//title ,Description,image_url and brand (only 4 fields in products table)
+
+		$conn = $this->conn;
+		$data = $this->data;
+		 //the rest of the fields are for the product_retailor table
+		$accepted =['Title','apikey','productID','Description','image_url','Brand','RetailerID','Price','Stock'];
+
+		foreach($data as  $attr=>$value){
+			if(!in_array($attr,$accepted)){
+				$this->respond("error","Invalid Parameter",400);
+			}
+		}
+		if(!isset($data['Title'])){
+			$this->respond("error","Title missing",400);
+		}
+		if(!isset($data['productID'])){
+
+			$this->respond("error","productID missing",400);
+		}
+		if(!isset($data['Description'])){
+			$this->respond("error","Description missing",400);
+		}
+		if(!isset($data['image_url'])){
+			$this->respond("error","image_url missing",400);
+		}
+		if(!isset($data['Brand'])){
+			$this->respond("error","Brand missing",400);
+		}
+		if(!isset($data['RetailerID'])){
+			$this->respond("error","RetailerID missing",400);
+		}
+		if(!isset($data['Price'])){
+			$this->respond("error","Price missing",400);
+		}
+		if(!isset($data['Stock'])){
+			$this->respond("error","Stock missing",400);
+		}
+
+		if(!isset($data['apikey'] )|| !$this->checkApiKey($data['apikey'])){
+			$this->respond('error','Invalid or mising apikey',403);
+		}
+
+		$stmt = $conn->prepare("SELECT Type FROM users WHERE Api_key = ?");
+		$stmt->bind_param("s",$data['apikey']);
+		$stmt->execute();
+		$result = $stmt->get_result();
+		$type;
+		if($result && $row = $result->fetch_assoc()){
+			$type = $row['Type'];
+		}else{
+			
+			$this->respond('error',"User not found",403);
+		}
+
+		if($type === "Customer"){
+			$this->respond('error','Customer cant perform such a request',403);
+		}//just an extra security check to make sure customers cant make changes to the db
+
+		//now the addinf to the the product table
+
+		// Check if product already exists in the products table
+		$stmt = $conn->prepare("SELECT * FROM products WHERE productID = ?");
+		$stmt->bind_param("i", $data['productID']);
+		$stmt->execute();
+		$result = $stmt->get_result();
+
+		if($result && $result->num_rows === 0){
+		//will create a new product if the product doesnt already exsists 
+			$stmt = $conn->prepare("INSERT INTO products (productID, Title, Description, image_url, Brand) VALUES (?, ?, ?, ?, ?)");
+			$stmt->bind_param("issss", $data['productID'], $data['Title'], $data['Description'], $data['image_url'], $data['Brand']);
+
+			if(!$stmt->execute()){
+				$this->respond('error', 'Failed to add product to products table', 500);
+			}
+		}
+
+		$stmt = $conn->prepare("SELECT * FROM product_retailer WHERE productID = ? AND RetailerID = ?");
+		$stmt->bind_param("ii", $data['productID'], $data['RetailerID']);
+		$stmt->execute();
+		$result = $stmt->get_result();
+
+		if($result && $result->num_rows > 0){
+			// Update existing record
+			$stmt = $conn->prepare("UPDATE product_retailer SET Price = ?, Stock = ? WHERE productID = ? AND RetailerID = ?");
+			$stmt->bind_param("diii", $data['Price'], $data['Stock'], $data['productID'], $data['RetailerID']);
+			if (!$stmt->execute()) {
+				$this->respond('error', 'Failed to update product for retailer', 500);
+			}
+		} else {
+			// Insert new record
+			$stmt = $conn->prepare("INSERT INTO product_retailer (productID, RetailerID, Price, Stock) VALUES (?, ?, ?, ?)");
+			$stmt->bind_param("iidi", $data['productID'], $data['RetailerID'], $data['Price'], $data['Stock']);
+			if (!$stmt->execute()) {
+				$this->respond('error', 'Failed to add product for retailer', 500);
+			}
+		}
+
+		$this->respond('success', 'Product added/updated successfully', 200);
+	}
+
 	private function handleLogin(){
 		$data=$this->data;
 		$conn =$this->conn;
@@ -994,6 +1095,10 @@ class Api{
 
 				case "AddReview":
 					$this->handleAddReview();
+					break;
+				
+				case "addProduct":
+					$this->handleAddProduct();
 					break;
 
 				default:
