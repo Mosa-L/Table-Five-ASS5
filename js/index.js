@@ -129,8 +129,25 @@ function fetchAndRenderProducts(options){
 
             card.innerHTML = '<img src="' + p.Image_url + '" alt = "' + p.Title + '">' +
             '<div class = "description">' + '<h5>' + p.Title + '</h5>' + '<h4>From R' + (p.LowestPrice ? p.LowestPrice.toLocaleString() : '-')
-            + '</h4>' + '</div>' + '<a href="compare.html"><i class= "fa-solid fa-arrow-right-arrow-left compare"></i></a>' +
+            + '</h4>' + '</div>' + '<a href="compare.html" class="compare-btn"><i class= "fa-solid fa-arrow-right-arrow-left compare"></i></a>' +
             '<a href= "favourites.html"><i class = "fa-regular fa-heart favourites"></i></a>';
+
+			// event listener for compare button
+			// card.querySelector('.compare-btn').addEventListener('click', function(e){
+			// 	e.stopPropagation();
+			// 	// Save this product as the initial compare list
+			// 	localStorage.setItem('compareList', JSON.stringify([p]));
+			// 	window.location.href = 'compare.html';
+			// });
+
+			(function(product){
+				card.querySelector('.compare-btn').addEventListener('click', function(e){
+					e.stopPropagation();
+					localStorage.setItem('compareList', JSON.stringify([product]));
+					window.location.href = 'compare.html';
+				});
+			})(p);
+
             //event listener to go to view page
             (function(pid, el){
                 el.addEventListener('click', function(){

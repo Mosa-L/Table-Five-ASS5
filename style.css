@@ -501,11 +501,18 @@ button.checkBut{/*For the checkout button*/
 
                    /*For the compare page*/
 #compare-grid {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    margin-top: 7%;
+    display: block;
     width: 100%;
+    margin-top: 5%;
+}
+
+#compare-grid > .compare-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+    width: 90vw;
+    max-width: 1200px;
+    margin: 0 auto 32px auto;
 }
 
 .compare-container {
@@ -515,6 +522,7 @@ button.checkBut{/*For the checkout button*/
     width: 90vw;
     max-width: 1200px;
     margin-bottom: 5%;
+    
 }
 
 .compare-product {
@@ -582,8 +590,20 @@ button.checkBut{/*For the checkout button*/
     border-radius: 20px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.08);
     padding: 32px 24px;
+    margin-left: auto;
+    margin-right: auto;
     margin-bottom: 40px;
+    margin-top: 0;
     overflow-x: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Make the table itself centered inside the container */
+.compare-table {
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .compare-table {
@@ -1228,4 +1248,89 @@ button.checkBut{/*For the checkout button*/
     font-size: 15px;
 }
 
+/* Compare page: Modal styling for search */
+.search-modal {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.25);
+    z-index: 3000;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 80px;
+}
+
+.search-modal .modal-content {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.13);
+    padding: 40px 32px 32px 32px;
+    min-width: 420px;
+    max-width: 95vw;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.search-modal .close-modal {
+    position: absolute;
+    top: 18px;
+    right: 24px;
+    font-size: 24px;
+    color: #bfa06a;
+    cursor: pointer;
+    z-index: 10;
+    transition: color 0.2s;
+}
+
+.search-modal .close-modal:hover {
+    color: #d9534f;
+}
+
+.search-modal h2 {
+    text-align: center;
+    margin-bottom: 18px;
+    font-size: 22pt;
+    color: #333;
+}
+
+.search-modal .searchCont {
+    display: flex;
+    align-items: center;
+    border: 2px solid burlywood;
+    border-radius: 25px;
+    overflow: hidden;
+    margin-bottom: 18px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.search-modal .searchCont input[type="text"] {
+    flex: 1;
+    padding: 10px 14px;
+    border: none;
+    outline: none;
+    font-size: 15pt;
+    background: transparent;
+}
+
+.search-modal .searchCont button {
+    background: burlywood;
+    border: none;
+    padding: 10px 18px;
+    color: #222;
+    font-size: 16pt;
+    border-radius: 0 25px 25px 0;
+    transition: background 0.2s;
+}
+
+.search-modal .searchCont button:hover {
+    background: #d4a373;
+}
+
+.search-modal .search-results {
+    margin-top: 10px;
+    min-height: 40px;
+}
 
