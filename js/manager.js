@@ -32,7 +32,7 @@ function renderProducts(filter = '', sort = '') {
             <img src="${prod.images && prod.images[0] ? prod.images[0] : './images/COMPAREIT Logo - Black with Transparent Background.svg'}" alt="${prod.name}">
             <div class="compare-desc">
                 <h5>${prod.name}</h5>
-                <h4>${lowestPrice !== null ? '$' + lowestPrice : ''}</h4>
+                <h4>${lowestPrice !== null ? 'R' + lowestPrice : ''}</h4>
                 <p style="font-size:13px; color:#888;">${cats}</p>
             </div>
             <div class="manager-action-btns">
