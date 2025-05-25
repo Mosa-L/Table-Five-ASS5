@@ -207,6 +207,155 @@ class Api{
 
 	}
 
+	private function handleFilter(){
+
+		$data=$this->data;
+		$conn=$this->conn;
+
+		$query="SELECT DISTINCT p.* FROM products AS p";
+
+		$values=[];
+    	$types='';
+		$joins='';
+    	$where=[];
+		$products=null;
+
+		//Category filtering
+		if(isset($data['category'])){
+
+			$joins.=" JOIN product_categories pc ON p.ProductID=pc.ProductID ";
+			$where[]="pc.CategoryID=?";
+			$values[]=$data['category'];
+			$types.='i';
+		}
+
+		//Retailer filtering
+		if (isset($data['retailer'])) {
+			$joins.=" JOIN product_retailers pr ON p.ProductID=pr.ProductID";
+			$where[]="pr.RetailerID = ?";
+			$values[]=$data['retailer'];
+			$types.='i';
+    	}
+
+		//Brand filtering
+		if (isset($data['brand'])) {
+			$where[] = "p.Brand = ?";
+			$values[] = $data['brand'];
+			$types .= 's';
+    	}	
+
+		$query.=$joins;
+		if(!empty($where)){
+			$query.=" WHERE ".implode(" AND ", $where);
+		}
+
+		$productStmt=$conn->prepare($query);
+
+		if(!empty($values)){
+
+			$productStmt->bind_param($types,...$values);
+		}
+
+		if($productStmt->execute()){
+
+			$result=$productStmt->get_result();
+			$products=$result->fetch_all(MYSQLI_ASSOC);
+		}else{
+
+			$this->respond('error',$productStmt->error,500);
+			$products=null;
+		}
+
+		//Adding prices and retailers
+		foreach ($products as &$product) {
+			$productID=$product['ProductID'];
+
+			$stmt=$conn->prepare(
+				"SELECT r.RetailerName, r.Website_url, pr.Price, pr.Stock
+				FROM retailers AS r JOIN product_retailers as pr ON r.RetailerID=pr.RetailerID
+				WHERE ProductID=?"
+			);
+
+			$stmt->bind_param("i", $productID);
+			if(!$stmt->execute()){
+
+				$this->respond("error", $stmt->error, 500);
+			}
+			$result=$stmt->get_result();
+
+			$retailers=[];
+			while($row=$result->fetch_assoc()){
+
+				$retailers[] = [
+					'Name' => $row['RetailerName'],
+					'Website_url' => $row['Website_url'],
+					'Price' => $row['Price'],
+					'Stock' => $row['Stock']
+				];
+			}
+
+			$product['Retailers']=$retailers;
+
+			//Adding lowestPrice
+			$product['LowestPrice']=$this->lowestPrice($product);
+			$stmt->close();
+		}
+    	unset($product);
+
+		//Filter by price
+		if (isset($data['price_min'])){
+			$term=$data['price_min'];
+			$products = array_filter($products, function($p) use ($term) {
+				return isset($p['LowestPrice']) && $p['LowestPrice']>=$term;
+			});
+		}
+			
+		if (isset($data['price_max'])){
+			$term=$data['price_max'];
+			$products = array_filter($products, function($p) use ($term) {
+				return isset($p['LowestPrice']) && $p['LowestPrice']<=$term;
+			});
+		}
+
+		//Adding reviews
+		foreach ($products as &$product) {
+			$productID=$product['ProductID'];
+
+			$stmt=$conn->prepare(
+				"SELECT u.FirstName, u.LastName, r.Rating, r.Comment, r.ReviewDate
+				FROM users AS u JOIN reviews as r ON u.UserID=r.UserID
+				WHERE ProductID=?"
+			);
+
+			$stmt->bind_param("i", $productID);
+			if(!$stmt->execute()){
+
+				$this->respond("error", $stmt->error, 500);
+			}
+
+			$result=$stmt->get_result();
+
+			$reviews=[];
+			while($row=$result->fetch_assoc()){
+
+				$reviews[] = [
+					'Name' => $row['FirstName'],
+					'Surname' => $row['LastName'],
+					'Rating' => $row['Rating'],
+					'Comment' => $row['Comment'],
+					'Date' => $row['ReviewDate']
+				];
+			}
+
+			$product['Reviews']=$reviews;
+			$stmt->close();
+		}
+    	unset($product);
+
+		$this->respond('success',$products,200);
+
+	}
+
 	private function buildQuery($data){
 
 		$conn=$this->conn;
@@ -304,8 +453,6 @@ class Api{
 			$query.=" LIMIT $limit";
 		}
 
-		error_log($query);
-		error_log(print_r($values, true));
 
 		$productStmt=$conn->prepare($query);
 
@@ -709,7 +856,7 @@ class Api{
 		$conn = $this->conn;
 		$data = $this->data;
 		 //the rest of the fields are for the product_retailor table
-		$accepted =['Title','apikey','productID','Description','image_url','Brand','RetailerID','Price','Stock'];
+		$accepted =['Title','apikey','productID','Description','Image_url','Brand','RetailerID','Price','Stock'];
 
 		foreach($data as  $attr=>$value){
 			if(!in_array($attr,$accepted)){
@@ -719,15 +866,15 @@ class Api{
 		if(!isset($data['Title'])){
 			$this->respond("error","Title missing",400);
 		}
-		if(!isset($data['productID'])){
+		if(!isset($data['ProductID'])){
 
-			$this->respond("error","productID missing",400);
+			$this->respond("error","ProductID missing",400);
 		}
 		if(!isset($data['Description'])){
 			$this->respond("error","Description missing",400);
 		}
-		if(!isset($data['image_url'])){
-			$this->respond("error","image_url missing",400);
+		if(!isset($data['Image_url'])){
+			$this->respond("error","Image_url missing",400);
 		}
 		if(!isset($data['Brand'])){
 			$this->respond("error","Brand missing",400);
@@ -765,43 +912,94 @@ class Api{
 		//now the addinf to the the product table
 
 		// Check if product already exists in the products table
-		$stmt = $conn->prepare("SELECT * FROM products WHERE productID = ?");
-		$stmt->bind_param("i", $data['productID']);
+		$stmt = $conn->prepare("SELECT * FROM products WHERE ProductID = ?");
+		$stmt->bind_param("i", $data['ProductID']);
 		$stmt->execute();
 		$result = $stmt->get_result();
 
 		if($result && $result->num_rows === 0){
 		//will create a new product if the product doesnt already exsists 
-			$stmt = $conn->prepare("INSERT INTO products (productID, Title, Description, image_url, Brand) VALUES (?, ?, ?, ?, ?)");
-			$stmt->bind_param("issss", $data['productID'], $data['Title'], $data['Description'], $data['image_url'], $data['Brand']);
+			$stmt = $conn->prepare("INSERT INTO products (ProductID, Title, Description, Image_url, Brand) VALUES (?, ?, ?, ?, ?)");
+			$stmt->bind_param("issss", $data['ProductID'], $data['Title'], $data['Description'], $data['Image_url'], $data['Brand']);
 
 			if(!$stmt->execute()){
 				$this->respond('error', 'Failed to add product to products table', 500);
 			}
 		}
 
-		$stmt = $conn->prepare("SELECT * FROM product_retailer WHERE productID = ? AND RetailerID = ?");
-		$stmt->bind_param("ii", $data['productID'], $data['RetailerID']);
+		$stmt = $conn->prepare("SELECT * FROM product_retailer WHERE ProductID = ? AND RetailerID = ?");
+		$stmt->bind_param("ii", $data['ProductID'], $data['RetailerID']);
 		$stmt->execute();
 		$result = $stmt->get_result();
 
 		if($result && $result->num_rows > 0){
 			// Update existing record
-			$stmt = $conn->prepare("UPDATE product_retailer SET Price = ?, Stock = ? WHERE productID = ? AND RetailerID = ?");
-			$stmt->bind_param("diii", $data['Price'], $data['Stock'], $data['productID'], $data['RetailerID']);
+			$stmt = $conn->prepare("UPDATE product_retailer SET Price = ?, Stock = ? WHERE ProductID = ? AND RetailerID = ?");
+			$stmt->bind_param("diii", $data['Price'], $data['Stock'], $data['ProductID'], $data['RetailerID']);
 			if (!$stmt->execute()) {
 				$this->respond('error', 'Failed to update product for retailer', 500);
 			}
 		} else {
 			// Insert new record
-			$stmt = $conn->prepare("INSERT INTO product_retailer (productID, RetailerID, Price, Stock) VALUES (?, ?, ?, ?)");
-			$stmt->bind_param("iidi", $data['productID'], $data['RetailerID'], $data['Price'], $data['Stock']);
+			$stmt = $conn->prepare("INSERT INTO product_retailer (ProductID, RetailerID, Price, Stock) VALUES (?, ?, ?, ?)");
+			$stmt->bind_param("iidi", $data['ProductID'], $data['RetailerID'], $data['Price'], $data['Stock']);
 			if (!$stmt->execute()) {
 				$this->respond('error', 'Failed to add product for retailer', 500);
 			}
 		}
 
 		$this->respond('success', 'Product added/updated successfully', 200);
+	}
+
+	private function handleDeleteProduct(){
+
+		$data=$this->data;
+		$conn=$this->conn;
+
+		if(!isset($data['ProductID'])){
+
+			$this->respond('error','ProductID parameter missing',400);
+		}
+
+		try{
+
+			$conn->begin_transaction();
+
+			$stmt=$conn->prepare('SELECT ProductID FROM products WHERE ProductID=?');
+
+			$stmt->bind_param('i',$data['ProductID']);
+
+			if (!$stmt->execute()) {
+				$conn->rollback();
+				$this->respond('error', 'Failed to get product', 400);
+			}
+
+			$stmt->store_result();
+			
+			if($stmt->num_rows==0){
+				$conn->rollback();
+				$this->respond('error', 'Product does not exist', 400);
+			}
+
+			$productID=$data['ProductID'];
+
+			$delProduct=$conn->prepare('DELETE FROM products WHERE ProductID = ?');
+			$delProduct->bind_param('i',$productID);
+
+			if(!$delProduct->execute()){
+
+				$conn->rollback();
+				$this->respond('error','Failed to delete product',500);
+			}
+
+			$conn->commit();
+			$this->respond('success','Product deleted successfully',200);
+
+		}catch(Exception $error){
+
+			$this->respond('error','Failed to delete product: '.$error->getMessage(),500);
+		}
+
 	}
 
 	private function handleLogin(){
@@ -1074,7 +1272,7 @@ class Api{
 					break;
 
 				case "Favourite":
-					$this->handleFavourite();
+					$this->handleFavourites();
 					break;
 
 				case "GetFavourites":
@@ -1089,16 +1287,20 @@ class Api{
 					$this->handleGetDistinct();
 					break;
 
-				case "Save":
-					$this->handleSave();
-					break;
-
 				case "AddReview":
 					$this->handleAddReview();
 					break;
 				
 				case "addProduct":
 					$this->handleAddProduct();
+					break;
+
+				case "RemoveProduct":
+					$this->handleDeleteProduct();
+					break;
+
+				case "Filter":
+					$this->handleFilter();
 					break;
 
 				default:
