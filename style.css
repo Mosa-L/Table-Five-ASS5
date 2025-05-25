@@ -503,6 +503,7 @@ button.checkBut{/*For the checkout button*/
 #compare-grid {
     display: block;
     width: 100%;
+    margin-top: 5%;
 }
 
 #compare-grid > .compare-container {
@@ -521,6 +522,7 @@ button.checkBut{/*For the checkout button*/
     width: 90vw;
     max-width: 1200px;
     margin-bottom: 5%;
+    
 }
 
 .compare-product {
@@ -588,11 +590,9 @@ button.checkBut{/*For the checkout button*/
     border-radius: 20px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.08);
     padding: 32px 24px;
-    margin: 0 auto 40px auto;
+    margin: 0 auto 40px auto; /* Center horizontally */
     overflow-x: auto;
-    margin-left: 0;
-    margin-right: 0;
-    /* Remove float or grid/row alignment if any */
+    display: block;
 }
 
 .compare-table {
