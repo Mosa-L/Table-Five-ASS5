@@ -45,6 +45,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="search-results"></div>
             </div>
         `;
+        // Insert modal before the compare grid so it appears above add product boxes
+        const compareGrid = document.querySelector('#compare-grid') || document.body;
+        compareGrid.parentNode.insertBefore(modal, compareGrid);
+
         document.body.appendChild(modal);
         
         // Add event listeners
