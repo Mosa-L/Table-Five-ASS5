@@ -192,14 +192,14 @@ p{
     padding-top: 7px;
     font-size: 15px;
     font-weight: 700;
-    color: burlywood;
+    color: rgb(200, 133, 46);
 }
 
 #products .pro .compare{/*repsitioning and resizing compare icon*/
     width: 60px;
     height: 40px;
     line-height: 40px;  
-    color: burlywood;
+    color: rgb(200, 133, 46);
     position: absolute;/*every time we use absolute in child element, we have to put relative in parent element*/
     bottom: 4.5%;
     right: 20%;
@@ -209,7 +209,7 @@ p{
     width: 60px;
     height: 40px;
     line-height: 40px;  
-    color: burlywood;
+    color: rgb(200, 133, 46);
     position: absolute;/*every time we use absolute in child element, we have to put relative in parent element*/
     bottom: 4.5%;
     right: 5%;
@@ -552,7 +552,7 @@ button.checkBut{/*For the checkout button*/
 .compare-product.add-product {
     background: #f7f7f7;
     border: 2px dashed burlywood;
-    color: burlywood;
+    color: rgb(200, 133, 46);;
     cursor: pointer;
     min-height: 250px;
     transition: background 0.2s;
@@ -560,7 +560,7 @@ button.checkBut{/*For the checkout button*/
 }
 
 .compare-product.add-product:hover {
-    background: #f3e9dd;
+    background: #f2dabd;
 }
 
 .compare-product.add-product i {
@@ -570,7 +570,7 @@ button.checkBut{/*For the checkout button*/
 
 .compare-product.add-product span {
     font-size: 18px;
-    color: #bfa06a;
+    color: rgb(200, 133, 46);
 }
 
 .compare-table-container {
@@ -653,7 +653,7 @@ button.checkBut{/*For the checkout button*/
 
 .retailer-list li {
     background: #f7f7f7;
-    color: #bfa06a;
+    color: rgb(200, 133, 46);
     border-radius: 8px;
     padding: 4px 10px;
     margin: 4px 0;
@@ -723,7 +723,7 @@ button.checkBut{/*For the checkout button*/
 .single-pro-details h4{
     font-size: 20px;
     margin: 10px 0 5px 0;
-    color: #bfa06a;
+    color: rgb(200, 133, 46);;
 }
 
 .single-pro-details p{
@@ -918,5 +918,257 @@ button.checkBut{/*For the checkout button*/
     display: flex;
     justify-content: center;
     margin-top: 40px;
+}
+
+                            /* Manager Dashboard Modal & Product Card Buttons */
+/*#productModal {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}*/
+
+/* Instead, rely on the following: */
+.manager-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.25);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+}
+
+.manager-modal.show {
+    display: flex;
+}
+
+#productModal .form-container {
+    width: 450px;
+    position: relative;
+}
+
+#productModal #closeModal {
+    position: absolute;
+    top: 18px;
+    right: 24px;
+    font-size: 24px;
+    color: #bfa06a;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.manager-action-btns {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    justify-content: center;
+}
+
+.manager-action-btns .edit-btn,
+.manager-action-btns .delete-btn {
+    background: burlywood;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 16px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.manager-action-btns .edit-btn:hover {
+    background: #d4a373;
+}
+
+.manager-action-btns .delete-btn {
+    background: #d9534f;
+}
+
+.manager-action-btns .delete-btn:hover {
+    background: #b52a23;
+}
+
+#imagePreview img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+/* Manager Dashboard Layout */
+.manager-dashboard-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 0 0 0;
+}
+
+.manager-controls-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.manager-search-bar {
+    flex: 2 1 350px;
+    min-width: 250px;
+    margin: 0;
+    position: static;
+    left: 0;
+    width: auto;
+    border: 2px solid burlywood;
+    border-radius: 25px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.manager-search-bar input {
+    font-size: 15pt;
+    background: transparent;
+    width: 100%;
+    padding: 10px 12px;
+    border-color: transparent;
+}
+
+.manager-search-bar button {
+    background: burlywood;
+    border: none;
+    padding: 10px 18px;
+    color: #222;
+    font-size: 16pt;
+    border-radius: 0 25px 25px 0;
+    transition: background 0.2s;
+}
+
+.manager-search-bar button:hover {
+    background: #d4a373;
+}
+
+.manager-filters {
+    flex: 1 1 180px;
+    min-width: 150px;
+    margin: 0;
+    position: static;
+    left: 0;
+    width: auto;
+    
+}
+
+.manager-filters select {
+    width: 100%;
+    font-size: 15pt;
+    padding: 8px 12px;
+    border-radius: 25px;
+    border: 2px solid burlywood;
+    background: #fff;
+    color: #222;
+    padding: 10px 12px;
+}
+
+/* Manager Products Grid */
+.manager-products-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 32px;
+    margin-top: 0;
+    width: 100%;
+}
+
+/* Modal Styling */
+.manager-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.25);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+}
+
+.manager-modal.show {
+    display: flex;
+}
+
+.manager-modal .form-container {
+    width: 450px;
+    position: relative;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.13);
+    padding: 40px 32px 32px 32px;
+}
+
+.manager-modal-close {
+    position: absolute;
+    top: 18px;
+    right: 24px;
+    font-size: 24px;
+    color: #bfa06a;
+    cursor: pointer;
+    z-index: 10;
+    transition: color 0.2s;
+}
+
+.manager-modal-close:hover {
+    color: #d9534f;
+}
+
+/* Retailer input row styling for manager modal */
+#retailersList {
+    margin-bottom: 8px;
+}
+
+.retailer-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.retailer-row .retailer-name {
+    flex: 2 1 0;
+    min-width: 0;
+    padding: 10px 12px;
+    font-size: 15pt;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #faf9f7;
+}
+
+.retailer-row .retailer-price {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 10px 12px;
+    font-size: 15pt;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #faf9f7;
+}
+
+.retailer-row .remove-retailer-btn {
+    flex: 0 0 auto;
+    background: #d9534f;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+    line-height: 32px;
+    text-align: center;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+    transition: background 0.2s;
+}
+
+.retailer-row .remove-retailer-btn:hover {
+    background: #b52a23;
 }
 

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CompareIt - Manager Dashboard</title>
+    <link rel="stylesheet" href="./style.css"/>
+    <script src="https://kit.fontawesome.com/a8501f958b.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div id="header" class="section-padding">
+        <img class="navlogo" src="./images/COMPAREIT Logo - Black with Transparent Background.svg" alt="CompareIt Logo"/>
+        <ul id="navbar">
+            <li><a href="index.html"><i class="fa-solid fa-house"></i></a></li>
+            <li><a href="compare.html">Compare</a></li>
+            <li><a href="favourites.html">Favourites</a></li>
+            <li><a href="manager.html" class="active">Manager</a></li>
+            <li><a href="login.html">Login</a></li>
+            <li><a href="signup.html">Signup</a></li>
+        </ul>
+    </div>
+
+    <section style="margin-top: 2%; margin-bottom: 5%;"><!--Do not change the in-line styling here!!-->
+        <div class="manager-dashboard-wrapper">
+            <h2 style="text-align:center;">Manager Dashboard</h2>
+            <div class="manager-controls-row">
+                <div class="searchCont">
+                    <input type="text" id="searchInput" placeholder="Search products...">
+                    <button id="searchBut"><i class="fa fa-search"></i></button>
+                </div>
+                <div class="filters">
+                    <select id="category">
+                        <option value="">Sort By</option>
+                        <option value="name">Name</option>
+                        <option value="priceLow">Price: Low to High</option>
+                        <option value="priceHigh">Price: High to Low</option>
+                    </select>
+                </div>
+            </div>
+            <div class="compare-container manager-products-grid" id="manager-products-grid">
+                <!-- Product cards will be rendered here by JS -->
+                <div class="compare-product add-product" id="addProductBtn">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Add Product</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal for Add/Edit Product -->
+    <div id="productModal" class="manager-modal">
+        <div class="form-container">
+            <span id="closeModal" class="manager-modal-close"><i class="fa-solid fa-xmark"></i></span>
+            <h2 id="modalTitle">Add Product</h2>
+            <form id="productForm">
+                <div class="form-group">
+                    <label for="prodName">Product Name:</label>
+                    <input type="text" id="prodName" name="prodName" required>
+                </div>
+                <div class="form-group">
+                    <label for="prodPrice">Price:</label>
+                    <input type="number" id="prodPrice" name="prodPrice" min="0" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="prodCategory">Categories (comma separated):</label>
+                    <input type="text" id="prodCategory" name="prodCategory" placeholder="e.g. electronics, laptops" required>
+                </div>
+                <div class="form-group">
+                    <label for="prodDesc">Description:</label>
+                    <textarea id="prodDesc" name="prodDesc" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="prodImages">Images:</label>
+                    <input type="file" id="prodImages" name="prodImages" accept="image/*" multiple>
+                    <div id="imagePreview" style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;"></div>
+                </div>
+                <div class="form-group">
+                    <label>Retailers & Prices (optional):</label>
+                    <div id="retailersList"></div>
+                    <button type="button" id="addRetailerBtn" style="margin-top:8px; background:burlywood; color:#fff; border:none; border-radius:6px; padding:6px 14px; font-size:14px; cursor:pointer;">
+                        <i class="fa fa-plus"></i> Add Retailer
+                    </button>
+                </div>
+                <div class="form-group formBut">
+                    <button type="submit" id="saveProductBtn">Save</button>
+                </div>
+                <input type="hidden" id="editProductId">
+                <p id="modalError" class="error-message"></p>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/manager.js"></script>
+</body>
+</html>
