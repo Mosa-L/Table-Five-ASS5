@@ -590,9 +590,20 @@ button.checkBut{/*For the checkout button*/
     border-radius: 20px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.08);
     padding: 32px 24px;
-    margin: 0 auto 40px auto; /* Center horizontally */
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 40px;
+    margin-top: 0;
     overflow-x: auto;
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Make the table itself centered inside the container */
+.compare-table {
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .compare-table {
