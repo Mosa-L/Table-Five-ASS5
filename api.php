@@ -1074,7 +1074,7 @@ class Api{
 					break;
 
 				case "Favourite":
-					$this->handleFavourite();
+					$this->handleFavourites();
 					break;
 
 				case "GetFavourites":
