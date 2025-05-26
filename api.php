@@ -812,6 +812,46 @@ class Api{
 
 		$stmt->close();
 
+		foreach ($favouriteProducts as &$product) {
+			$productID=$product['ProductID'];
+
+			$stmt=$conn->prepare(
+				"SELECT r.RetailerName, r.Website_url, pr.Price, pr.Stock
+				FROM retailers AS r JOIN product_retailers as pr ON r.RetailerID=pr.RetailerID
+				WHERE ProductID=?"
+			);
+
+			$stmt->bind_param("i", $productID);
+			if(!$stmt->execute()){
+
+				$this->respond("error", $stmt->error, 500);
+			}
+			$result=$stmt->get_result();
+
+			$retailers=[];
+			while($row=$result->fetch_assoc()){
+
+				$retailers[] = [
+					'Name' => $row['RetailerName'],
+					'Website_url' => $row['Website_url'],
+					'Price' => $row['Price'],
+					'Stock' => $row['Stock']
+				];
+			}
+
+			$product['Retailers']=$retailers;
+
+			$lowestPrice=$this->lowestPrice($product);
+
+			if(isset($lowestPrice)){
+
+				$product['LowestPrice']=$lowestPrice;
+			}
+
+			$stmt->close();
+		}
+    	unset($product);
+
 		$this->respond('success',$favouriteProducts,200);
 		
 	}
@@ -855,6 +895,8 @@ class Api{
 	private function handleAddProduct() {
 		$conn = $this->conn;
 		$data = $this->data;
+		 //the rest of the fields are for the product_retailor table
+		$accepted =['Title','apikey','ProductID','Description','Image_url','Brand','RetailerID','Price','Stock'];
 
 		$requiredFields = ['apikey', 'ProductID', 'Title', 'Description', 'Image_url', 'Brand', 'retailers', 'categories'];
 		foreach ($requiredFields as $field) {
@@ -1053,19 +1095,19 @@ class Api{
 
 		$email=$data['email'];
 
-		$stmt=$conn->prepare("SELECT FirstName,LastName,Api_key,Password FROM users WHERE email=?");
+		$stmt=$conn->prepare("SELECT FirstName,LastName,Api_key,Password,Type FROM users WHERE email=?");
 
 		$stmt->bind_param("s",$email);
 
 		if($stmt->execute()){
 
-			$stmt->bind_result($Firstname,$Lastname,$Api_key,$hashedPassword);
+			$stmt->bind_result($Firstname,$Lastname,$Api_key,$hashedPassword,$user_type);
 		
 			if($stmt->fetch()){
 
 				if(password_verify($password,$hashedPassword)) {
 					
-					$this->respond("success",[['apikey'=>$Api_key,'name'=>$Firstname, 'surname'=>$Lastname]],200);
+					$this->respond("success",[['apikey'=>$Api_key,'name'=>$Firstname, 'surname'=>$Lastname, 'user_type'=>$user_type]],200);
 
 				}else{
 					
@@ -1353,8 +1395,6 @@ class Api{
 		if(isset($data['type'])){
 
 			$reqType=$data['type'];
-
-			// $this->fetchCurrencies();
 
 			switch($reqType){
 
