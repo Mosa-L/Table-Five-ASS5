@@ -1078,19 +1078,19 @@ class Api{
 
 		$email=$data['email'];
 
-		$stmt=$conn->prepare("SELECT FirstName,LastName,Api_key,Password FROM users WHERE email=?");
+		$stmt=$conn->prepare("SELECT FirstName,LastName,Api_key,Password,Type FROM users WHERE email=?");
 
 		$stmt->bind_param("s",$email);
 
 		if($stmt->execute()){
 
-			$stmt->bind_result($Firstname,$Lastname,$Api_key,$hashedPassword);
+			$stmt->bind_result($Firstname,$Lastname,$Api_key,$hashedPassword,$user_type);
 		
 			if($stmt->fetch()){
 
 				if(password_verify($password,$hashedPassword)) {
 					
-					$this->respond("success",[['apikey'=>$Api_key,'name'=>$Firstname, 'surname'=>$Lastname]],200);
+					$this->respond("success",[['apikey'=>$Api_key,'name'=>$Firstname, 'surname'=>$Lastname, 'user_type'=>$user_type]],200);
 
 				}else{
 					
