@@ -1,7 +1,7 @@
 var API_URL = './api.php';
 var apiKey = localStorage.getItem('apikey') || '3a160d66562032f9'; //stored api key or default
 var productContainer = document.querySelector('.proCont');  //container where products go
-var navBar = document.getElementById('header');
+var navBar = document.getElementById('navbar');
 
 //-----------If user is logged in...-----------------
 if (apiKey && apiKey !== '3a160d66562032f9'){

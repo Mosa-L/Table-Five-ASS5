@@ -38,13 +38,17 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="modal-content">
                 <span class="close-modal">&times;</span>
                 <h2>Search Products</h2>
-                <div class="search-container">
+                <div class="searchCont">
                     <input type="text" id="productSearch" placeholder="Search products...">
                     <button id="searchButton">Search</button>
                 </div>
                 <div class="search-results"></div>
             </div>
         `;
+        // Insert modal before the compare grid so it appears above add product boxes
+        const compareGrid = document.querySelector('#compare-grid') || document.body;
+        compareGrid.parentNode.insertBefore(modal, compareGrid);
+
         document.body.appendChild(modal);
         
         // Add event listeners
@@ -153,19 +157,25 @@ document.addEventListener('DOMContentLoaded', function() {
         compareContainer.innerHTML = '';
         
         // Render products in compare list
-        compareList.forEach((product, index) => {
-            const productEl = document.createElement('div');
-            productEl.className = 'compare-product' + (product.isMain ? ' main-product' : '');
-            productEl.innerHTML = `
-                <div class="remove-product" data-index="${index}">×</div>
-                <img src="${product.Image_url || './images/placeholder.jpg'}" alt="${product.Title}">
-                <div class="compare-desc">
-                    <h4>${product.Title}</h4>
-                    <p>From R${product.LowestPrice || 'N/A'}</p>
-                </div>
-            `;
-            compareContainer.appendChild(productEl);
-        });
+		compareList.forEach((product, index) => {
+			const productEl = document.createElement('div');
+			productEl.className = 'compare-product' + (product.isMain ? ' main-product' : '');
+			productEl.innerHTML = `
+				<div class="remove-product" data-index="${index}">×</div>
+				<img src="${product.Image_url || './images/placeholder.jpg'}" alt="${product.Title}">
+				<div class="compare-desc">
+					<h4>${product.Title}</h4>
+					<p>From R${product.LowestPrice || 'N/A'}</p>
+				</div>
+			`;
+			// Add click handler to redirect to view page
+			productEl.addEventListener('click', function(e){
+				// Prevent redirect if X button is clicked
+				if(e.target.classList.contains('remove-product')) return;
+				window.location.href = 'view.html?productID=' + product.ProductID;
+			});
+			compareContainer.appendChild(productEl);
+		});
         
         // Add empty product boxes
         const emptySlots = 4 - compareList.length;
@@ -197,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			if(existingTable){
 				existingTable.remove();
 			}
-			return; 
+    		return;
 		}
 
         // If we have products to compare, add comparison table
@@ -215,138 +225,127 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Remove product
         compareList.splice(index, 1);
-        
         // Save to localStorage
         localStorage.setItem('compareList', JSON.stringify(compareList));
+		// Reload from localStorage to ensure sync
+		compareList = JSON.parse(localStorage.getItem('compareList')) || [];
     }
     
-    // Function to render comparison table
-    function renderComparisonTable(){
-        // Remove existing table if any
-        const existingTable = document.querySelector('.comparison-table-container');
-        if(existingTable){
-            existingTable.remove();
-        }
-        
-        // Create table container
-        const tableContainer = document.createElement('div');
-        tableContainer.className = 'comparison-table-container';
-        
-        // Create table
-        const table = document.createElement('table');
-        table.className = 'comparison-table';
-        
-        // Headers row
-        const thead = document.createElement('thead');
-        const headerRow = document.createElement('tr');
-        
-        // First cell is empty
-        headerRow.appendChild(document.createElement('th'));
-        
-        // Add product names as headers
-        compareList.forEach(product => {
-            const th = document.createElement('th');
-            th.textContent = product.Title;
-            headerRow.appendChild(th);
-        });
-        
-        thead.appendChild(headerRow);
-        table.appendChild(thead);
-        
-        // Table body
-        const tbody = document.createElement('tbody');
-        
-        // Add price row
-        const priceRow = document.createElement('tr');
-        const priceLabel = document.createElement('td');
-        priceLabel.textContent = 'Price';
-        priceLabel.className = 'row-label';
-        priceRow.appendChild(priceLabel);
-        
-        compareList.forEach(product => {
-            const td = document.createElement('td');
-            td.textContent = product.LowestPrice ? `R${product.LowestPrice}` : 'N/A';
-            priceRow.appendChild(td);
-        });
-        
-        tbody.appendChild(priceRow);
-        
-        // Add brand row
-        const brandRow = document.createElement('tr');
-        const brandLabel = document.createElement('td');
-        brandLabel.textContent = 'Brand';
-        brandLabel.className = 'row-label';
-        brandRow.appendChild(brandLabel);
-        
-        compareList.forEach(product => {
-            const td = document.createElement('td');
-            td.textContent = product.Brand || 'N/A';
-            brandRow.appendChild(td);
-        });
-        
-        tbody.appendChild(brandRow);
-        
-        // Add specs rows - get all unique spec types
-        const allSpecTypes = new Set();
-        compareList.forEach(product => {
-            if(product.Specifications){
-                Object.keys(product.Specifications).forEach(spec => {
-                    allSpecTypes.add(spec);
-                });
-            }
-        });
-        
-        // Add a row for each spec type
-        allSpecTypes.forEach(specType => {
-            const specRow = document.createElement('tr');
-            const specLabel = document.createElement('td');
-            specLabel.textContent = specType;
-            specLabel.className = 'row-label';
-            specRow.appendChild(specLabel);
-            
-            compareList.forEach(product => {
-                const td = document.createElement('td');
-                td.textContent = product.Specifications && product.Specifications[specType] ? 
-                    product.Specifications[specType] : 'N/A';
-                specRow.appendChild(td);
-            });
-            
-            tbody.appendChild(specRow);
-        });
-        
-        // Add retailers row if available
-        const hasRetailers = compareList.some(p => p.Retailers && p.Retailers.length);
-        if(hasRetailers){
-            const storesRow = document.createElement('tr');
-            const storesLabel = document.createElement('td');
-            storesLabel.textContent = 'Retailers';
-            storesLabel.className = 'row-label';
-            storesRow.appendChild(storesLabel);
-            
-            compareList.forEach(product => {
-                const td = document.createElement('td');
-                if(product.Retailers && product.Retailers.length){
-                    const retailersList = document.createElement('ul');
-                    product.Retailers.forEach(retailer => {
-                        const li = document.createElement('li');
-                        li.innerHTML = `${retailer.Name}: R${retailer.Price}`;
-                        retailersList.appendChild(li);
-                    });
-                    td.appendChild(retailersList);
-                }else{
-                    td.textContent = 'N/A';
-                }
-                storesRow.appendChild(td);
-            });
-            tbody.appendChild(storesRow);
-        }
-        
-        table.appendChild(tbody);
-        tableContainer.appendChild(table);
-        
-        // Add table to the page
-        document.getElementById('compare-grid').appendChild(tableContainer);
-    }
+	function renderComparisonTable(){
+		// Remove existing table if any
+		const existingTable = document.querySelector('.compare-table-container');
+		if(existingTable){
+			existingTable.remove();
+		}
+
+		// Create table container
+		const tableContainer = document.createElement('div');
+		tableContainer.className = 'compare-table-container';
+
+		// Create table
+		const table = document.createElement('table');
+		table.className = 'compare-table';
+
+		// Headers row
+		const thead = document.createElement('thead');
+		const headerRow = document.createElement('tr');
+
+		// First cell is "Attribute"
+		const attrTh = document.createElement('th');
+		attrTh.textContent = 'Attribute';
+		headerRow.appendChild(attrTh);
+
+		// Add product headers with image and name
+		compareList.forEach(product => {
+			const th = document.createElement('th');
+			const headerDiv = document.createElement('div');
+			headerDiv.className = 'compare-table-header';
+			headerDiv.innerHTML = `
+				<img src="${product.Image_url || './images/placeholder.jpg'}" alt="${product.Title}"/>
+				<span>${product.Title}</span>
+			`;
+			th.appendChild(headerDiv);
+			headerRow.appendChild(th);
+		});
+
+		thead.appendChild(headerRow);
+		table.appendChild(thead);
+
+		// Table body
+		const tbody = document.createElement('tbody');
+
+		// Price row
+		const priceRow = document.createElement('tr');
+		const priceLabel = document.createElement('td');
+		priceLabel.textContent = 'Price';
+		priceRow.appendChild(priceLabel);
+		compareList.forEach(product => {
+			const td = document.createElement('td');
+			td.textContent = product.LowestPrice ? `R${product.LowestPrice}` : 'N/A';
+			priceRow.appendChild(td);
+		});
+		tbody.appendChild(priceRow);
+
+		// Retailers row
+		const hasRetailers = compareList.some(p => p.Retailers && p.Retailers.length);
+		if(hasRetailers){
+			const retailersRow = document.createElement('tr');
+			const retailersLabel = document.createElement('td');
+			retailersLabel.textContent = 'Retailers';
+			retailersRow.appendChild(retailersLabel);
+
+			compareList.forEach(product => {
+				const td = document.createElement('td');
+				if(product.Retailers && product.Retailers.length){
+					const ul = document.createElement('ul');
+					ul.className = 'retailer-list';
+					product.Retailers.forEach(retailer => {
+						const li = document.createElement('li');
+						li.textContent = retailer.Name;
+						ul.appendChild(li);
+					});
+					td.appendChild(ul);
+				} else {
+					td.textContent = 'N/A';
+				}
+				retailersRow.appendChild(td);
+			});
+			tbody.appendChild(retailersRow);
+		}
+
+		// Add spec rows 
+		const allSpecTypes = new Set();
+		compareList.forEach(product => {
+			if(product.Specifications){
+				Object.keys(product.Specifications).forEach(spec => {
+					allSpecTypes.add(spec);
+				});
+			}
+		});
+
+		allSpecTypes.forEach(specType => {
+			const specRow = document.createElement('tr');
+			const specLabel = document.createElement('td');
+			specLabel.textContent = specType;
+			specRow.appendChild(specLabel);
+
+			compareList.forEach(product => {
+				const td = document.createElement('td');
+				td.textContent = product.Specifications && product.Specifications[specType]
+					? product.Specifications[specType]
+					: 'N/A';
+				specRow.appendChild(td);
+			});
+
+			tbody.appendChild(specRow);
+		});
+
+		table.appendChild(tbody);
+		tableContainer.appendChild(table);
+
+		// Add table to the page 
+		document.getElementById('compare-grid').appendChild(tableContainer);
+	}
     
     // Initial render
     renderCompareGrid();
