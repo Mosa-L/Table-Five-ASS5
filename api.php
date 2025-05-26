@@ -810,6 +810,46 @@ class Api{
 
 		$stmt->close();
 
+		foreach ($favouriteProducts as &$product) {
+			$productID=$product['ProductID'];
+
+			$stmt=$conn->prepare(
+				"SELECT r.RetailerName, r.Website_url, pr.Price, pr.Stock
+				FROM retailers AS r JOIN product_retailers as pr ON r.RetailerID=pr.RetailerID
+				WHERE ProductID=?"
+			);
+
+			$stmt->bind_param("i", $productID);
+			if(!$stmt->execute()){
+
+				$this->respond("error", $stmt->error, 500);
+			}
+			$result=$stmt->get_result();
+
+			$retailers=[];
+			while($row=$result->fetch_assoc()){
+
+				$retailers[] = [
+					'Name' => $row['RetailerName'],
+					'Website_url' => $row['Website_url'],
+					'Price' => $row['Price'],
+					'Stock' => $row['Stock']
+				];
+			}
+
+			$product['Retailers']=$retailers;
+
+			$lowestPrice=$this->lowestPrice($product);
+
+			if(isset($lowestPrice)){
+
+				$product['LowestPrice']=$lowestPrice;
+			}
+
+			$stmt->close();
+		}
+    	unset($product);
+
 		$this->respond('success',$favouriteProducts,200);
 		
 	}
@@ -856,7 +896,7 @@ class Api{
 		$conn = $this->conn;
 		$data = $this->data;
 		 //the rest of the fields are for the product_retailor table
-		$accepted =['Title','apikey','productID','Description','Image_url','Brand','RetailerID','Price','Stock'];
+		$accepted =['Title','apikey','ProductID','Description','Image_url','Brand','RetailerID','Price','Stock'];
 
 		foreach($data as  $attr=>$value){
 			if(!in_array($attr,$accepted)){
@@ -1254,8 +1294,6 @@ class Api{
 		if(isset($data['type'])){
 
 			$reqType=$data['type'];
-
-			// $this->fetchCurrencies();
 
 			switch($reqType){
 
