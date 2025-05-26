@@ -794,9 +794,10 @@ class Api{
 
 
 		$stmt = $conn->prepare("
-			SELECT p.* 
+			SELECT p.* ,t.price
 			FROM favourites f 
 			JOIN products p ON p.ProductID = f.ProductID 
+			JOIN product_retailers  t ON t.ProductID = f.ProductID
 			WHERE f.UserID = ?
 		");
 		$stmt->bind_param("i", $userID);
@@ -1175,6 +1176,88 @@ class Api{
 		}
 
 	}
+	private function handleEditProduct(){
+		$data = $this->data;
+		$conn = $this->conn;
+
+		if (!isset($data['ProductID'])) {
+			$this->respond("error", "Missing ProductID parameter", 400);
+			return;
+		}
+
+		$productID = $data['ProductID'];
+		
+		$stmt = $conn->prepare("SELECT * FROM products WHERE ProductID = ?");
+		$stmt->bind_param("i", $productID);
+		$stmt->execute();
+		$result = $stmt->get_result();
+
+		if ($result->num_rows === 0){
+			$this->respond("error", "Product not found", 404);
+			return;
+		}
+
+		$fieldsToUpdate = [];
+		$params = [];
+		$types = "";
+
+		if (isset($data['Name'])) {
+			$fieldsToUpdate[] = "Name = ?";
+			$params[] = $data['Name'];
+			$types .= "s";
+		}
+
+		if (isset($data['Description'])) {
+			$fieldsToUpdate[] = "Description = ?";
+			$params[] = $data['Description'];
+			$types .= "s";
+		}
+
+		if (isset($data['Images'])) {
+			$fieldsToUpdate[] = "Images = ?";
+			$params[] = $data['Images'];
+			$types .= "s";
+		}
+
+		if (!empty($fieldsToUpdate)) {
+			$query = "UPDATE products SET " . implode(", ", $fieldsToUpdate) . " WHERE ProductID = ?";
+			$params[] = $productID;
+			$types .= "i";
+
+			$stmt = $conn->prepare($query);
+			$stmt->bind_param($types, ...$params);
+			$stmt->execute();
+		}
+
+		if (isset($data['Retailers']) && is_array($data['Retailers'])){
+			foreach ($data['Retailers'] as $retailerData){
+				if(!isset($retailerData['RetailerID'], $retailerData['Price'])){
+					continue; 
+				}
+
+				$retailerID = $retailerData['RetailerID'];
+				$price = $retailerData['Price'];
+
+				$checkStmt = $conn->prepare("SELECT * FROM product_retailer WHERE ProductID = ? AND RetailerID = ?");
+				$checkStmt->bind_param("ii", $productID, $retailerID);
+				$checkStmt->execute();
+				$existing = $checkStmt->get_result();
+
+				if ($existing->num_rows > 0){
+					$updateStmt = $conn->prepare("UPDATE product_retailer SET Price = ? WHERE ProductID = ? AND RetailerID = ?");
+					$updateStmt->bind_param("dii", $price, $productID, $retailerID);
+					$updateStmt->execute();
+				}else{
+					
+					$insertStmt = $conn->prepare("INSERT INTO product_retailer (ProductID, RetailerID, Price) VALUES (?, ?, ?)");
+					$insertStmt->bind_param("iid", $productID, $retailerID, $price);
+					$insertStmt->execute();
+				}
+			}
+		}
+
+    	$this->respond("success", "Product updated successfully", 200);
+	}
 
 	private function handleAddReview(){
 
@@ -1301,6 +1384,10 @@ class Api{
 
 				case "Filter":
 					$this->handleFilter();
+					break;
+
+				case "editProduct":
+					$this->handleEditProduct();
 					break;
 
 				default:
