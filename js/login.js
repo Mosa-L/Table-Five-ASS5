@@ -59,12 +59,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 localStorage.setItem('apikey', user.apikey);
 				localStorage.setItem('name', user.name);
 				localStorage.setItem('surname', user.surname);
+				localStorage.setItem('user_type', user.user_type);
+
                 
                 errorMessage.textContent = "Login successful!";
                 errorMessage.style.color = "green";
                 
                 setTimeout(() => {
-                    window.location.href = "index.html";
+                    if (user.user_type === 'Manager') {
+						window.location.href = "manager.html";
+					} else {
+						window.location.href = "index.html";
+					}
                 }, 1000);
             }else{
 

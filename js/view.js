@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function(){
     //         apiKey = JSON.parse(user).apikey;
     //     } catch (e) {}
     // }
-	const apiKey = localStorage.getItem('apikey');
+	const apiKey = localStorage.getItem('apikey') || '3a160d66562032f9';
 
     // Fetch product info
     fetch('api.php', {

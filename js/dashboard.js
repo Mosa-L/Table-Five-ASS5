@@ -98,10 +98,16 @@ function renderTopRated(products){
             p.Reviews.forEach(function(r){
                 var item = document.createElement('div');
                 item.style.marginBottom = '0.5em';
+				let dateStr = '';
+				if(r.Date){
+					const safeDate = r.Date.replace(' ', 'T');
+					const d = new Date(safeDate);
+					dateStr = isNaN(d.getTime()) ? '' : d.toLocaleDateString();
+				}
                 item.innerHTML =
                     '<strong>' + r.Name + ' ' + r.Surname + '</strong> &mdash; ' +
                     '<span style="color:gold;">' + r.Rating + ' ★</span><br>' +
-                    '<em style="font-size:0.9em;">' + new Date(r.ReviewDate).toLocaleDateString() + '</em><br>' +
+                    '<em style="font-size:0.9em;">' + (dateStr || '') + '</em><br>' +
                     '<p style="margin:0.2em 0;">' + r.Comment + '</p>';
                 list.appendChild(item);
             });
@@ -138,3 +144,5 @@ function renderReviewHistogram(products){
         }
     });
 }
+
+//'<em style="font-size:0.9em;">' + new Date(r.ReviewDate).toLocaleDateString() + '</em><br>' +

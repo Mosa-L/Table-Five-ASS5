@@ -2,55 +2,30 @@ var API_URL = './api.php';
 var apiKey = localStorage.getItem('apikey') || '3a160d66562032f9'; //stored api key or default
 var productContainer = document.querySelector('.proCont');  //container where products go
 var navBar = document.getElementById('navbar');
+var favouriteIDs = [];
 
-//-----------If user is logged in...-----------------
-if (apiKey && apiKey !== '3a160d66562032f9'){
-    //remove login button
-    var loginLink = navBar.querySelector('a[href="login.html"]');
-    if (loginLink){
-        var li = loginLink.parentNode;
-        li.parentNode.removeChild(li);
-    }
-
-    //remove signup button
-    var signupLink = navBar.querySelector('a[href="signup.html"]');
-    if (signupLink){
-        var li2 = signupLink.parentNode;
-        li2.parentNode.removeChild(li2);
-    }
-    //add greeting
-    var storedname = localStorage.getItem('name');
-    if (storedname){
-        var greetingLi = document.createElement('li');
-        greetingLi.style.listStyleType = 'none';
-        greetingLi.style.display       = 'inline-block';
-        greetingLi.style.marginRight   = '1em';
-        var greetSpan = document.createElement('span');
-        greetSpan.textContent = 'Hello, ' + storedname + '!';
-        greetSpan.style.marginRight = '1em';
-        greetingLi.appendChild(greetSpan);
-
-        var navBar = document.getElementById('navbar');
-        navBar.insertBefore(greetingLi, navBar.firstChild);
-    }
-
-    //adds logout button
-    var logoutLi = document.createElement('li');
-    logoutLi.style.listStyleType = 'none';
-    logoutLi.style.display       = 'inline-block';
-    logoutLi.style.marginRight   = '1em';
-    var logoutA = document.createElement('a');
-    logoutA.href = '#';
-    logoutA.textContent = 'Logout';
-    logoutLi.appendChild(logoutA);
-    navBar.appendChild(logoutLi);
-
-    //clear apikey and redirect to index
-    logoutA.addEventListener('click', function(e){
-        e.preventDefault();
-        localStorage.clear();
-        window.location.href = 'index.html';
-    });
+//function to fetch user's favourites and check if they exist before adding 
+function fetchFavouritesList(callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', API_URL, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState !== 4) return;
+        try {
+            var resp = JSON.parse(xhr.responseText);
+            if (resp.status === 'success') {
+                favouriteIDs = resp.data.map(function(fav) { return fav.ProductID; });
+                if (callback) callback();
+            }
+        } catch (e) {
+            favouriteIDs = [];
+            if (callback) callback();
+        }
+    };
+    xhr.send(JSON.stringify({
+        type: 'GetFavourites',
+        apikey: apiKey
+    }));
 }
 
 function fetchCategories() {
@@ -92,6 +67,8 @@ function populateCategoryDropdown(categories) {
 }
 
 function fetchAndRenderProducts(options){
+	
+
     options = options || {};
 
     var payload = {
@@ -189,6 +166,12 @@ function fetchAndRenderProducts(options){
 
             productContainer.appendChild(card);
 
+			if(favouriteIDs.indexOf(p.ProductID) !== -1){
+				var icon = card.querySelector('.fav-btn i');
+				icon.classList.remove('fa-regular');
+				icon.classList.add('fa-solid');
+			}
+
             (function(product){
 				card.querySelector('.compare-btn').addEventListener('click', function(e){
 					e.stopPropagation();
@@ -205,40 +188,54 @@ function fetchAndRenderProducts(options){
             })(p.ProductID, card);
 
 
-            (function(pid, favBtn) {
-                favBtn.addEventListener('click', function(e) {
+            (function(pid, favBtn, product) {
+				favBtn.addEventListener('click', function(e) {
+					e.preventDefault();
+					e.stopPropagation();
 
-                    e.preventDefault();
-                    e.stopPropagation();
+					// Require login for favourites
+					if(!apiKey || apiKey === '3a160d66562032f9'){
+						alert('You must be logged in to add favourites.');
+						window.location.href = 'login.html';
+						return;
+					}
 
-                    var xhr = new XMLHttpRequest();
-                    xhr.open('POST', API_URL, true);
-                    xhr.setRequestHeader('Content-Type','application/json');
-                    xhr.onreadystatechange = function() {
-                    if (xhr.readyState !== 4) return;
-                    try {
-                        var r = JSON.parse(xhr.responseText);
-                        if (r.status === 'success' || r.data.indexOf('already') !== -1) {
-                        //heart fills in if it is in favorites
-                        var icon = favBtn.querySelector('i');
-                        icon.classList.remove('fa-regular');
-                        icon.classList.add('fa-solid');
-                        } else {
-                        console.error('Fav API error:', r.data);
-                        }
-                    } 
-                    catch (err){
-                        console.error('Fav parse error:', xhr.responseText);
-                    }
-                    };
-                    
-                    xhr.send(JSON.stringify({
-                    type:      'Favourite',
-                    apikey:    apiKey,
-                    ProductID: pid
-                    }));
-                });
-            })(p.ProductID, card.querySelector('.fav-btn'));
+					// Check if already in favourites
+					if (favouriteIDs.indexOf(pid) !== -1) {
+						alert('This product is already in your favourites!');
+						return;
+					}
+
+					var xhr = new XMLHttpRequest();
+					xhr.open('POST', API_URL, true);
+					xhr.setRequestHeader('Content-Type','application/json');
+					xhr.onreadystatechange = function() {
+						if (xhr.readyState !== 4) return;
+						try {
+							var r = JSON.parse(xhr.responseText);
+							if (r.status === 'success') {
+								// Add to local list and update icon
+								favouriteIDs.push(pid);
+								var icon = favBtn.querySelector('i');
+								icon.classList.remove('fa-regular');
+								icon.classList.add('fa-solid');
+							} else if (r.data && r.data.indexOf('already') !== -1) {
+								alert('This product is already in your favourites!');
+							} else {
+								console.error('Fav API error:', r.data);
+							}
+						} 
+						catch (err){
+							console.error('Fav parse error:', xhr.responseText);
+						}
+					};
+					xhr.send(JSON.stringify({
+						type:      'Favourite',
+						apikey:    apiKey,
+						ProductID: pid
+					}));
+				});
+			})(p.ProductID, card.querySelector('.fav-btn'), p);
         }
     }
 
@@ -246,7 +243,9 @@ function fetchAndRenderProducts(options){
 //---------------------------FILTERS (actually showing/using them)---------------------------
 document.addEventListener("DOMContentLoaded", function() {
     fetchCategories();
-    fetchAndRenderProducts();
+    fetchFavouritesList(function() {
+        fetchAndRenderProducts();
+    });
     //search button
     document.getElementById('searchBut').addEventListener('click', function (){
         var text = document.getElementById('searchInput').value.trim();

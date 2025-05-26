@@ -1,59 +1,130 @@
-// Product management logic for manager dashboard
-
-let products = JSON.parse(localStorage.getItem('managerProducts')) || [];
+const API_URL = './api.php';
+const apiKey = localStorage.getItem('apikey');
+const userType = localStorage.getItem('user_type');
+let products = [];
 let editingProductId = null;
 
-// Utility: Render products grid
-function renderProducts(filter = '', sort = '') {
+// Redirect to login if not manager
+if (!apiKey || userType !== 'Manager') {
+    alert('You must be logged in as a manager to access this page.');
+    window.location.href = 'login.html';
+}
+
+// Fetch and render products from API
+function fetchAndRenderProducts(options = {}) {
+    const payload = {
+        type: 'GetAllProducts',
+        apikey: apiKey,
+        return: '*',
+        search: {},
+        fuzzy: true
+    };
+
+    // Search
+    if (options.search && options.search.text) {
+        payload.search.Title = options.search.text;
+    }
+    // Sort
+    if (options.sort) {
+        if (options.sort === 'name') payload.sort = 'Title';
+        if (options.sort === 'priceLow' || options.sort === 'priceHigh') payload.sort = 'price';
+        if (options.sort === 'priceLow') payload.order = 'ASC';
+        if (options.sort === 'priceHigh') payload.order = 'DESC';
+    }
+
+    // POST to API
+    fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            products = data.data;
+            renderProducts(products);
+        } else {
+            document.getElementById('manager-products-grid').innerHTML = `<p class="error">${data.data || 'Failed to load products.'}</p>`;
+        }
+    })
+    .catch(err => {
+        document.getElementById('manager-products-grid').innerHTML = `<p class="error">Server error loading products.</p>`;
+        console.error(err);
+    });
+}
+
+// Render products grid
+function renderProducts(products) {
     const grid = document.getElementById('manager-products-grid');
-    // Remove all except the add-product card
+    // Remove all product cards except the add-product card
     grid.querySelectorAll('.compare-product:not(.add-product)').forEach(e => e.remove());
 
-    let filtered = products.filter(p => {
-        // Support filter for multiple categories
-        const categories = Array.isArray(p.category) ? p.category : (typeof p.category === 'string' ? p.category.split(',').map(c => c.trim()) : []);
-        return (
-            p.name.toLowerCase().includes(filter.toLowerCase()) ||
-            categories.some(cat => cat.toLowerCase().includes(filter.toLowerCase()))
-        );
-    });
+    // Move the add-product card to the top if it's not already
+    const addProductCard = document.getElementById('addProductBtn');
+    if (addProductCard && addProductCard.parentNode.firstChild !== addProductCard) {
+        grid.insertBefore(addProductCard, grid.firstChild);
+    }
 
-    if (sort === 'name') filtered.sort((a, b) => a.name.localeCompare(b.name));
-    if (sort === 'priceLow') filtered.sort((a, b) => getLowestPrice(a) - getLowestPrice(b));
-    if (sort === 'priceHigh') filtered.sort((a, b) => getLowestPrice(b) - getLowestPrice(a));
-
-    filtered.forEach((prod, idx) => {
+    // Insert each product card after the add-product card
+    let insertAfter = addProductCard;
+    products.forEach(prod => {
         const card = document.createElement('div');
         card.className = 'compare-product';
-        const lowestPrice = getLowestPrice(prod);
-        // Show all categories as comma separated
-        let cats = Array.isArray(prod.category) ? prod.category.join(', ') : prod.category;
+        const lowestPrice = prod.LowestPrice || (prod.Retailers && prod.Retailers.length ? Math.min(...prod.Retailers.map(r => parseFloat(r.Price))) : null);
+        let cats = Array.isArray(prod.Categories) ? prod.Categories.join(', ') : (prod.Categories || '');
         card.innerHTML = `
-            <img src="${prod.images && prod.images[0] ? prod.images[0] : './images/COMPAREIT Logo - Black with Transparent Background.svg'}" alt="${prod.name}">
+            <img src="${prod.Image_url || './images/COMPAREIT Logo - Black with Transparent Background.svg'}" alt="${prod.Title}">
             <div class="compare-desc">
-                <h5>${prod.name}</h5>
+                <h5>${prod.Title}</h5>
                 <h4>${lowestPrice !== null ? 'R' + lowestPrice : ''}</h4>
                 <p style="font-size:13px; color:#888;">${cats}</p>
             </div>
             <div class="manager-action-btns">
-                <button class="edit-btn" data-id="${prod.id}"><i class="fa fa-pen"></i> Edit</button>
-                <button class="delete-btn" data-id="${prod.id}"><i class="fa fa-trash"></i> Delete</button>
+                <button class="edit-btn" data-id="${prod.ProductID}"><i class="fa fa-pen"></i> Edit</button>
+                <button class="delete-btn" data-id="${prod.ProductID}"><i class="fa fa-trash"></i> Delete</button>
             </div>
         `;
-        grid.insertBefore(card, document.getElementById('addProductBtn'));
+        // Insert after the add product card
+        if (insertAfter.nextSibling) {
+            grid.insertBefore(card, insertAfter.nextSibling);
+        } else {
+            grid.appendChild(card);
+        }
+        insertAfter = card;
     });
 }
 
-// Helper: Get lowest price from retailers or price
-function getLowestPrice(prod) {
-    if (prod.retailers && prod.retailers.length) {
-        let prices = prod.retailers.map(r => parseFloat(r.price)).filter(p => !isNaN(p));
-        if (prices.length) return Math.min(...prices);
+// Modal logic
+function showProductModal(edit = false, product = null) {
+    const modal = document.getElementById('productModal');
+    modal.classList.add('show');
+    document.getElementById('modalTitle').textContent = edit ? 'Edit Product' : 'Add Product';
+    document.getElementById('modalError').textContent = '';
+    document.getElementById('productForm').reset();
+    document.getElementById('editProductId').value = '';
+	document.getElementById('retailersList').innerHTML = '';
+
+    if (edit && product) {
+        document.getElementById('prodName').value = product.Title || '';
+        document.getElementById('prodBrand').value = product.Brand || '';
+        document.getElementById('prodPrice').value = product.LowestPrice || '';
+        document.getElementById('prodCategory').value = Array.isArray(product.Categories) ? product.Categories.join(', ') : (product.Categories || '');
+        document.getElementById('prodDesc').value = product.Description || '';
+        document.getElementById('editProductId').value = product.ProductID;
+		document.getElementById('prodImage').value = product.Image_url || '';
+
+		// Populate retailers if present
+        if (product.Retailers && Array.isArray(product.Retailers)) {
+            product.Retailers.forEach(r => {
+                addRetailerField({
+                    name: r.Name || r.name || '',
+                    price: r.Price || r.price || ''
+                });
+            });
+        }
     }
-    return typeof prod.price === 'number' ? prod.price : null;
 }
 
-// Retailers UI logic
 function addRetailerField(retailer = {name: '', price: ''}) {
     const div = document.createElement('div');
     div.className = 'retailer-row';
@@ -73,119 +144,76 @@ document.getElementById('addRetailerBtn').onclick = function() {
     addRetailerField();
 };
 
-// Utility: Show modal
-function showProductModal(edit = false, product = null) {
-    const modal = document.getElementById('productModal');
-    modal.classList.add('show');
-    document.getElementById('modalTitle').textContent = edit ? 'Edit Product' : 'Add Product';
-    document.getElementById('modalError').textContent = '';
-    document.getElementById('productForm').reset();
-    document.getElementById('imagePreview').innerHTML = '';
-    document.getElementById('editProductId').value = '';
-    document.getElementById('retailersList').innerHTML = '';
-
-    if (edit && product) {
-        document.getElementById('prodName').value = product.name;
-        document.getElementById('prodPrice').value = product.price;
-        // Join categories for input
-        document.getElementById('prodCategory').value = Array.isArray(product.category) ? product.category.join(', ') : product.category;
-        document.getElementById('prodDesc').value = product.description;
-        document.getElementById('editProductId').value = product.id;
-        // Show images
-        if (product.images && product.images.length) {
-            product.images.forEach(src => {
-                const img = document.createElement('img');
-                img.src = src;
-                document.getElementById('imagePreview').appendChild(img);
-            });
-        }
-        // Show retailers
-        if (product.retailers && product.retailers.length) {
-            product.retailers.forEach(r => addRetailerField(r));
-        }
-    }
-}
-
-// Utility: Hide modal
 function hideProductModal() {
     document.getElementById('productModal').classList.remove('show');
 }
 
-// Handle Add Product button
+// Add Product button
 document.getElementById('addProductBtn').onclick = () => {
     editingProductId = null;
     showProductModal(false);
 };
 
-// Handle close modal
+// Close modal
 document.getElementById('closeModal').onclick = hideProductModal;
 
 // Handle form submit (add/edit)
 document.getElementById('productForm').onsubmit = function(e) {
     e.preventDefault();
-    const name = document.getElementById('prodName').value.trim();
+    const title = document.getElementById('prodName').value.trim();
+    const brand = document.getElementById('prodBrand').value.trim();
     const price = parseFloat(document.getElementById('prodPrice').value);
-    // Parse categories as array
     const category = document.getElementById('prodCategory').value.split(',').map(c => c.trim()).filter(Boolean);
     const description = document.getElementById('prodDesc').value.trim();
     const editId = document.getElementById('editProductId').value;
-    let images = [];
-    document.querySelectorAll('#imagePreview img').forEach(img => images.push(img.src));
+    const imageUrl = document.getElementById('prodImage').value.trim();
 
-    // Gather retailers
-    let retailers = [];
-    document.querySelectorAll('#retailersList .retailer-row').forEach(row => {
-        const rName = row.querySelector('.retailer-name').value.trim();
-        const rPrice = row.querySelector('.retailer-price').value.trim();
-        if (rName && rPrice) {
-            retailers.push({ name: rName, price: parseFloat(rPrice) });
-        }
-    });
-
-    if (!name || !category.length || !description || isNaN(price)) {
+    if (!title || !imageUrl || !brand || !category.length || !description || isNaN(price)) {
         document.getElementById('modalError').textContent = 'Please fill all fields.';
         return;
     }
 
-    if (editId) {
-        // Edit
-        const idx = products.findIndex(p => p.id === editId);
-        if (idx !== -1) {
-            products[idx] = { ...products[idx], name, price, category, description, images, retailers };
-        }
-    } else {
-        // Add
-        products.push({
-            id: 'prod_' + Date.now(),
-            name, price, category, description, images, retailers
-        });
-    }
-    localStorage.setItem('managerProducts', JSON.stringify(products));
-    renderProducts();
-    hideProductModal();
-};
+    // Prepare payload
+    const payload = {
+        type: editId ? 'editProduct' : 'addProduct',
+        apikey: apiKey,
+        Title: title,
+        Brand: brand,
+        Description: description,
+        Image_url: imageUrl,
+        // For addProduct, ProductID is auto-generated by DB, so don't send it unless editing
+        ...(editId ? { ProductID: editId } : {}),
+        // For now, just send as a string or array
+        Categories: category,
+        Price: price
+    };
 
-// Handle image preview
-document.getElementById('prodImages').onchange = function(e) {
-    const files = Array.from(e.target.files);
-    const preview = document.getElementById('imagePreview');
-    preview.innerHTML = '';
-    files.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = function(ev) {
-            const img = document.createElement('img');
-            img.src = ev.target.result;
-            preview.appendChild(img);
-        };
-        reader.readAsDataURL(file);
+    fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            hideProductModal();
+            fetchAndRenderProducts();
+        } else {
+            document.getElementById('modalError').textContent = data.data || 'Failed to save product.';
+        }
+    })
+    .catch(err => {
+        document.getElementById('modalError').textContent = 'Server error saving product.';
+        console.error(err);
     });
 };
+
 
 // Handle edit/delete buttons
 document.getElementById('manager-products-grid').onclick = function(e) {
     if (e.target.closest('.edit-btn')) {
         const id = e.target.closest('.edit-btn').dataset.id;
-        const prod = products.find(p => p.id === id);
+        const prod = products.find(p => p.ProductID == id);
         if (prod) {
             editingProductId = id;
             showProductModal(true, prod);
@@ -194,26 +222,51 @@ document.getElementById('manager-products-grid').onclick = function(e) {
     if (e.target.closest('.delete-btn')) {
         const id = e.target.closest('.delete-btn').dataset.id;
         if (confirm('Delete this product?')) {
-            products = products.filter(p => p.id !== id);
-            localStorage.setItem('managerProducts', JSON.stringify(products));
-            renderProducts();
+            fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'RemoveProduct',
+                    apikey: apiKey,
+                    ProductID: id
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    fetchAndRenderProducts();
+                } else {
+                    alert(data.data || 'Failed to delete product.');
+                }
+            })
+            .catch(err => {
+                alert('Server error deleting product.');
+                console.error(err);
+            });
         }
     }
 };
 
-// Search functionality
-document.getElementById('productSearchBtn').onclick = function() {
-    const val = document.getElementById('productSearchInput').value;
-    renderProducts(val, document.getElementById('sortProducts').value);
+// Search and sort event listeners
+document.getElementById('searchBut').onclick = function() {
+    const text = document.getElementById('searchInput').value.trim();
+    fetchAndRenderProducts({
+        search: { text: text },
+        sort: document.getElementById('category').value
+    });
 };
-document.getElementById('productSearchInput').oninput = function() {
-    renderProducts(this.value, document.getElementById('sortProducts').value);
+document.getElementById('searchInput').oninput = function() {
+    fetchAndRenderProducts({
+        search: { text: this.value.trim() },
+        sort: document.getElementById('category').value
+    });
 };
-
-// Sort functionality
-document.getElementById('sortProducts').onchange = function() {
-    renderProducts(document.getElementById('productSearchInput').value, this.value);
+document.getElementById('category').onchange = function() {
+    fetchAndRenderProducts({
+        search: { text: document.getElementById('searchInput').value.trim() },
+        sort: this.value
+    });
 };
 
 // Initial render
-renderProducts();
+fetchAndRenderProducts();
