@@ -799,6 +799,7 @@ class Api{
 			JOIN products p ON p.ProductID = f.ProductID 
 			JOIN product_retailers  t ON t.ProductID = f.ProductID
 			WHERE f.UserID = ?
+			GROUP BY p.ProductID
 		");
 		$stmt->bind_param("i", $userID);
 		$stmt->execute();
