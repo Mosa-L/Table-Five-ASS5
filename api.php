@@ -1186,7 +1186,7 @@ class Api{
 		}
 
 		$productID = $data['ProductID'];
-		
+
 		$stmt = $conn->prepare("SELECT * FROM products WHERE ProductID = ?");
 		$stmt->bind_param("i", $productID);
 		$stmt->execute();
@@ -1201,9 +1201,9 @@ class Api{
 		$params = [];
 		$types = "";
 
-		if (isset($data['Name'])) {
-			$fieldsToUpdate[] = "Name = ?";
-			$params[] = $data['Name'];
+		if (isset($data['Title'])) {
+			$fieldsToUpdate[] = "Title = ?";
+			$params[] = $data['Title'];
 			$types .= "s";
 		}
 
@@ -1213,9 +1213,9 @@ class Api{
 			$types .= "s";
 		}
 
-		if (isset($data['Images'])) {
-			$fieldsToUpdate[] = "Images = ?";
-			$params[] = $data['Images'];
+		if (isset($data['Image_url'])) {
+			$fieldsToUpdate[] = "Image_url = ?";
+			$params[] = $data['Image_url'];
 			$types .= "s";
 		}
 
@@ -1238,18 +1238,18 @@ class Api{
 				$retailerID = $retailerData['RetailerID'];
 				$price = $retailerData['Price'];
 
-				$checkStmt = $conn->prepare("SELECT * FROM product_retailer WHERE ProductID = ? AND RetailerID = ?");
+				$checkStmt = $conn->prepare("SELECT * FROM product_retailers WHERE ProductID = ? AND RetailerID = ?");
 				$checkStmt->bind_param("ii", $productID, $retailerID);
 				$checkStmt->execute();
 				$existing = $checkStmt->get_result();
 
 				if ($existing->num_rows > 0){
-					$updateStmt = $conn->prepare("UPDATE product_retailer SET Price = ? WHERE ProductID = ? AND RetailerID = ?");
+					$updateStmt = $conn->prepare("UPDATE product_retailers SET Price = ? WHERE ProductID = ? AND RetailerID = ?");
 					$updateStmt->bind_param("dii", $price, $productID, $retailerID);
 					$updateStmt->execute();
 				}else{
 					
-					$insertStmt = $conn->prepare("INSERT INTO product_retailer (ProductID, RetailerID, Price) VALUES (?, ?, ?)");
+					$insertStmt = $conn->prepare("INSERT INTO product_retailers (ProductID, RetailerID, Price) VALUES (?, ?, ?)");
 					$insertStmt->bind_param("iid", $productID, $retailerID, $price);
 					$insertStmt->execute();
 				}
