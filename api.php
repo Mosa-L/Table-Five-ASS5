@@ -852,106 +852,121 @@ class Api{
 		}
 	}
 
-	private function handleAddProduct(){
-		//title ,Description,image_url and brand (only 4 fields in products table)
-
+	private function handleAddProduct() {
 		$conn = $this->conn;
 		$data = $this->data;
-		 //the rest of the fields are for the product_retailor table
-		$accepted =['Title','apikey','productID','Description','Image_url','Brand','RetailerID','Price','Stock'];
 
-		foreach($data as  $attr=>$value){
-			if(!in_array($attr,$accepted)){
-				$this->respond("error","Invalid Parameter",400);
+		$requiredFields = ['apikey', 'ProductID', 'Title', 'Description', 'Image_url', 'Brand', 'retailers', 'categories'];
+		foreach ($requiredFields as $field) {
+			if (!isset($data[$field])) {
+				$this->respond("error", "$field missing", 400);
 			}
 		}
-		if(!isset($data['Title'])){
-			$this->respond("error","Title missing",400);
-		}
-		if(!isset($data['ProductID'])){
 
-			$this->respond("error","ProductID missing",400);
+		if (!is_array($data['retailers']) || count($data['retailers']) === 0) {
+			$this->respond("error", "Retailers must be a non-empty array", 400);
 		}
-		if(!isset($data['Description'])){
-			$this->respond("error","Description missing",400);
-		}
-		if(!isset($data['Image_url'])){
-			$this->respond("error","Image_url missing",400);
-		}
-		if(!isset($data['Brand'])){
-			$this->respond("error","Brand missing",400);
-		}
-		if(!isset($data['RetailerID'])){
-			$this->respond("error","RetailerID missing",400);
-		}
-		if(!isset($data['Price'])){
-			$this->respond("error","Price missing",400);
-		}
-		if(!isset($data['Stock'])){
-			$this->respond("error","Stock missing",400);
+		if (!is_array($data['categories']) || count($data['categories']) === 0) {
+			$this->respond("error", "Categories must be a non-empty array", 400);
 		}
 
-		if(!isset($data['apikey'] )|| !$this->checkApiKey($data['apikey'])){
-			$this->respond('error','Invalid or mising apikey',403);
+		if (!$this->checkApiKey($data['apikey'])) {
+			$this->respond('error', 'Invalid or missing apikey', 403);
 		}
 
 		$stmt = $conn->prepare("SELECT Type FROM users WHERE Api_key = ?");
-		$stmt->bind_param("s",$data['apikey']);
+		$stmt->bind_param("s", $data['apikey']);
 		$stmt->execute();
 		$result = $stmt->get_result();
-		$type;
-		if($result && $row = $result->fetch_assoc()){
-			$type = $row['Type'];
-		}else{
-			
-			$this->respond('error',"User not found",403);
+		if ($result && $row = $result->fetch_assoc()) {
+			if ($row['Type'] === "Customer") {
+				$this->respond('error', 'Customer cannot perform this action', 403);
+			}
+		} else {
+			$this->respond('error', "User not found", 403);
 		}
 
-		if($type === "Customer"){
-			$this->respond('error','Customer cant perform such a request',403);
-		}//just an extra security check to make sure customers cant make changes to the db
-
-		//now the addinf to the the product table
-
-		// Check if product already exists in the products table
+		// Add product if not exists
 		$stmt = $conn->prepare("SELECT * FROM products WHERE ProductID = ?");
 		$stmt->bind_param("i", $data['ProductID']);
 		$stmt->execute();
 		$result = $stmt->get_result();
-
-		if($result && $result->num_rows === 0){
-		//will create a new product if the product doesnt already exsists 
+		if ($result && $result->num_rows === 0) {
 			$stmt = $conn->prepare("INSERT INTO products (ProductID, Title, Description, Image_url, Brand) VALUES (?, ?, ?, ?, ?)");
 			$stmt->bind_param("issss", $data['ProductID'], $data['Title'], $data['Description'], $data['Image_url'], $data['Brand']);
-
-			if(!$stmt->execute()){
+			if (!$stmt->execute()) {
 				$this->respond('error', 'Failed to add product to products table', 500);
 			}
 		}
 
-		$stmt = $conn->prepare("SELECT * FROM product_retailer WHERE ProductID = ? AND RetailerID = ?");
-		$stmt->bind_param("ii", $data['ProductID'], $data['RetailerID']);
-		$stmt->execute();
-		$result = $stmt->get_result();
-
-		if($result && $result->num_rows > 0){
-			// Update existing record
-			$stmt = $conn->prepare("UPDATE product_retailer SET Price = ?, Stock = ? WHERE ProductID = ? AND RetailerID = ?");
-			$stmt->bind_param("diii", $data['Price'], $data['Stock'], $data['ProductID'], $data['RetailerID']);
-			if (!$stmt->execute()) {
-				$this->respond('error', 'Failed to update product for retailer', 500);
+		// Add categories
+		foreach ($data['categories'] as $categoryName) {
+			$stmt = $conn->prepare("SELECT CategoryID FROM categories WHERE Name = ?");
+			$stmt->bind_param("s", $categoryName);
+			$stmt->execute();
+			$result = $stmt->get_result();
+			if (!$result || $result->num_rows === 0) {
+				$this->respond('error', "Category '$categoryName' not found", 400);
 			}
-		} else {
-			// Insert new record
-			$stmt = $conn->prepare("INSERT INTO product_retailer (ProductID, RetailerID, Price, Stock) VALUES (?, ?, ?, ?)");
-			$stmt->bind_param("iidi", $data['ProductID'], $data['RetailerID'], $data['Price'], $data['Stock']);
-			if (!$stmt->execute()) {
-				$this->respond('error', 'Failed to add product for retailer', 500);
+			$row = $result->fetch_assoc();
+			$categoryID = $row['CategoryID'];
+
+			// Insert into product_categories if not already present
+			$stmt = $conn->prepare("SELECT * FROM product_categories WHERE ProductID = ? AND CategoryID = ?");
+			$stmt->bind_param("ii", $data['ProductID'], $categoryID);
+			$stmt->execute();
+			$result = $stmt->get_result();
+			if ($result->num_rows === 0) {
+				$stmt = $conn->prepare("INSERT INTO product_categories (ProductID, CategoryID) VALUES (?, ?)");
+				$stmt->bind_param("ii", $data['ProductID'], $categoryID);
+				if (!$stmt->execute()) {
+					$this->respond('error', "Failed to add category '$categoryName'", 500);
+				}
 			}
 		}
 
-		$this->respond('success', 'Product added/updated successfully', 200);
+		// Handle retailers
+		foreach ($data['retailers'] as $retailer) {
+			if (!isset($retailer['RetailerName']) || !isset($retailer['Price']) || !isset($retailer['Stock'])) {
+				$this->respond('error', 'Each retailer must include RetailerName, Price, and Stock', 400);
+			}
+
+			$retailerName = $retailer['RetailerName'];
+
+			// Get RetailerID
+			$stmt = $conn->prepare("SELECT RetailerID FROM retailers WHERE RetailerName = ?");
+			$stmt->bind_param("s", $retailerName);
+			$stmt->execute();
+			$result = $stmt->get_result();
+			if (!$result || $result->num_rows === 0) {
+				$this->respond('error', "Retailer '$retailerName' not found", 400);
+			}
+			$row = $result->fetch_assoc();
+			$retailerID = $row['RetailerID'];
+
+			// Check if entry exists
+			$stmt = $conn->prepare("SELECT * FROM product_retailers WHERE ProductID = ? AND RetailerID = ?");
+			$stmt->bind_param("ii", $data['ProductID'], $retailerID);
+			$stmt->execute();
+			$result = $stmt->get_result();
+			if ($result->num_rows > 0) {
+				$stmt = $conn->prepare("UPDATE product_retailers SET Price = ?, Stock = ? WHERE ProductID = ? AND RetailerID = ?");
+				$stmt->bind_param("diii", $retailer['Price'], $retailer['Stock'], $data['ProductID'], $retailerID);
+				if (!$stmt->execute()) {
+					$this->respond('error', "Failed to update retailer '$retailerName'", 500);
+				}
+			} else {
+				$stmt = $conn->prepare("INSERT INTO product_retailers (ProductID, RetailerID, Price, Stock) VALUES (?, ?, ?, ?)");
+				$stmt->bind_param("iidi", $data['ProductID'], $retailerID, $retailer['Price'], $retailer['Stock']);
+				if (!$stmt->execute()) {
+					$this->respond('error', "Failed to add retailer '$retailerName'", 500);
+				}
+			}
+		}
+
+		$this->respond('success', 'Product, retailers, and categories added/updated successfully', 200);
 	}
+
 
 	private function handleDeleteProduct(){
 
