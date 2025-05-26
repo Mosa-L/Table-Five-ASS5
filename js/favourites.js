@@ -1,5 +1,6 @@
 var API_URL = './api.php';
 var apiKey = localStorage.getItem('apikey') || '3a160d66562032f9';
+var navBar = document.getElementById('header');
 
 document.addEventListener('DOMContentLoaded', function (){
     if (!apiKey){
@@ -104,12 +105,13 @@ function renderFavourites(products){
         var p = products[i];
         var link = document.createElement('a');
         link.className = 'favourite-card';
+        var displayPrice = (p.LowestPrice !== undefined && p.LowestPrice !== null) ? p.LowestPrice : p.price; //uses lowest price if available, otherwise uses the regular price
 
         link.innerHTML = '<span class="remove-fav" title="Remove"><i class="fa-solid fa-xmark"></i></span>' +
         '<img src="' + p.Image_url + '" alt="' + p.Title + '">' +
         '<div class="fav-desc">' +
         '<h5>' + p.Title + '</h5>' +
-        '<h4>R' + (p.LowestPrice ? p.LowestPrice.toLocaleString() : ' ') + '</h4>' +
+        '<h4>R' + (displayPrice ? displayPrice.toLocaleString() : ' ') + '</h4>' +
         '</div>' +
         '<span class="compare-fav" title="Compare"><i class="fa-solid fa-arrow-right-arrow-left"></i></span>';
 
