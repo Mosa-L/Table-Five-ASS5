@@ -9,20 +9,20 @@ document.addEventListener('DOMContentLoaded', function (){
     fetchAndRenderFavourites();
 });
 
-if (apiKey && apiKey !== '3a160d66562032f9'){
+if (apiKey){
     //remove login button
     var loginLink = navBar.querySelector('a[href="login.html"]');
     if (loginLink){
         var li = loginLink.parentNode;
         li.parentNode.removeChild(li);
     }
-
     //remove signup button
     var signupLink = navBar.querySelector('a[href="signup.html"]');
     if (signupLink){
         var li2 = signupLink.parentNode;
-        li2.removeChild(li2);
+        li2.parentNode.removeChild(li2);
     }
+
     //add greeting
     var storedname = localStorage.getItem('name');
     if (storedname){
@@ -32,19 +32,22 @@ if (apiKey && apiKey !== '3a160d66562032f9'){
         greetSpan.style.marginRight = '1em';
         greetingLi.appendChild(greetSpan);
 
-        var navBar = document.getElementById('header');
+        var navBar = document.getElementById('navbar');
         navBar.insertBefore(greetingLi, navBar.firstChild);
     }
 
     //adds logout button
     var logoutLi = document.createElement('li');
+    logoutLi.style.listStyleType = 'none';
+    logoutLi.style.display       = 'inline-block';
+    logoutLi.style.marginRight   = '1em';
     var logoutA = document.createElement('a');
     logoutA.href = '#';
     logoutA.textContent = 'Logout';
     logoutLi.appendChild(logoutA);
     navBar.appendChild(logoutLi);
 
-    //clear apikey and redirect to index
+    //clear apikey and redirect to favourites
     logoutA.addEventListener('click', function(e){
         e.preventDefault();
         localStorage.clear();
@@ -115,14 +118,34 @@ function renderFavourites(products){
         (function(pid,cardEl){
             var btn = cardEl.querySelector('.remove-fav');
             btn.addEventListener('click', function (e){
-                e.prventDefault();
+                e.preventDefault();
                 e.stopPropagation();
-                //backend: remove from favorites request
-                removeFavourite(pid, cardEl);
+                removeFavourite(pid);
                 cardEl.parentNode.removeChild(cardEl);
             });
-        })(p.productID, link);
+        })(p.ProductID, link);
     }
+
+    (function(product, cardEl){
+    var cmpBtn = cardEl.querySelector('.compare-fav');
+    if (!cmpBtn) return;
+
+    cmpBtn.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+
+        var list = JSON.parse(localStorage.getItem('compareList') || '[]');
+
+        var exists = list.some(function(item){
+        return item.ProductID === product.ProductID;
+        });
+        if (!exists) list.push(product);
+
+        localStorage.setItem('compareList', JSON.stringify(list));
+        window.location.href = 'compare.html';
+    });
+    })(p, link);
+
 }
 
 function showError(msg){
@@ -140,9 +163,9 @@ function removeFavourite(productID){
         }
     };
     xhr.send(JSON.stringify({
-        type: 'RemoveFavourite',
+        type: 'removeFavourite',
         apikey: apiKey,
-        productID: productID
+        ProductID: productID
     }));
 }
 
