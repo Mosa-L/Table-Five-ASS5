@@ -107,7 +107,7 @@ function renderTopRated(products){
                 item.innerHTML =
                     '<strong>' + r.Name + ' ' + r.Surname + '</strong> &mdash; ' +
                     '<span style="color:gold;">' + r.Rating + ' ★</span><br>' +
-                    '<em style="font-size:0.9em;">' + (dateStr || '') + '</em><br>' +
+                    '<em style="font-size:0.9em;">' + r.Date + '</em><br>' +
                     '<p style="margin:0.2em 0;">' + r.Comment + '</p>';
                 list.appendChild(item);
             });
