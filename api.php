@@ -896,9 +896,9 @@ class Api{
 		$conn = $this->conn;
 		$data = $this->data;
 		 //the rest of the fields are for the product_retailor table
-		$accepted =['Title','apikey','ProductID','Description','Image_url','Brand','RetailerID','Price','Stock'];
+		$accepted =['Title','apikey','Description','Image_url','Brand','RetailerID','Price','Stock'];
 
-		$requiredFields = ['apikey', 'ProductID', 'Title', 'Description', 'Image_url', 'Brand', 'retailers', 'categories'];
+		$requiredFields = ['apikey', 'Title', 'Description', 'Image_url', 'Brand', 'retailers', 'categories'];
 		foreach ($requiredFields as $field) {
 			if (!isset($data[$field])) {
 				$this->respond("error", "$field missing", 400);
@@ -928,18 +928,13 @@ class Api{
 			$this->respond('error', "User not found", 403);
 		}
 
-		// Add product if not exists
-		$stmt = $conn->prepare("SELECT * FROM products WHERE ProductID = ?");
-		$stmt->bind_param("i", $data['ProductID']);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		if ($result && $result->num_rows === 0) {
-			$stmt = $conn->prepare("INSERT INTO products (ProductID, Title, Description, Image_url, Brand) VALUES (?, ?, ?, ?, ?)");
-			$stmt->bind_param("issss", $data['ProductID'], $data['Title'], $data['Description'], $data['Image_url'], $data['Brand']);
-			if (!$stmt->execute()) {
-				$this->respond('error', 'Failed to add product to products table', 500);
-			}
+		$stmt = $conn->prepare("INSERT INTO products (Title, Description, Image_url, Brand) VALUES (?, ?, ?, ?)");
+		$stmt->bind_param("ssss", $data['Title'], $data['Description'], $data['Image_url'], $data['Brand']);
+		if (!$stmt->execute()) {
+			$this->respond('error', 'Failed to add product to products table', 500);
 		}
+		$productID = $conn->insert_id; 
+
 
 		// Add categories
 		foreach ($data['categories'] as $categoryName) {
@@ -955,12 +950,12 @@ class Api{
 
 			// Insert into product_categories if not already present
 			$stmt = $conn->prepare("SELECT * FROM product_categories WHERE ProductID = ? AND CategoryID = ?");
-			$stmt->bind_param("ii", $data['ProductID'], $categoryID);
+			$stmt->bind_param("ii", $productID, $categoryID);
 			$stmt->execute();
 			$result = $stmt->get_result();
 			if ($result->num_rows === 0) {
 				$stmt = $conn->prepare("INSERT INTO product_categories (ProductID, CategoryID) VALUES (?, ?)");
-				$stmt->bind_param("ii", $data['ProductID'], $categoryID);
+				$stmt->bind_param("ii", $productID, $categoryID);
 				if (!$stmt->execute()) {
 					$this->respond('error', "Failed to add category '$categoryName'", 500);
 				}
@@ -988,18 +983,18 @@ class Api{
 
 			// Check if entry exists
 			$stmt = $conn->prepare("SELECT * FROM product_retailers WHERE ProductID = ? AND RetailerID = ?");
-			$stmt->bind_param("ii", $data['ProductID'], $retailerID);
+			$stmt->bind_param("ii", $productID, $retailerID);
 			$stmt->execute();
 			$result = $stmt->get_result();
 			if ($result->num_rows > 0) {
 				$stmt = $conn->prepare("UPDATE product_retailers SET Price = ?, Stock = ? WHERE ProductID = ? AND RetailerID = ?");
-				$stmt->bind_param("diii", $retailer['Price'], $retailer['Stock'], $data['ProductID'], $retailerID);
+				$stmt->bind_param("diii", $retailer['Price'], $retailer['Stock'], $productID, $retailerID);
 				if (!$stmt->execute()) {
 					$this->respond('error', "Failed to update retailer '$retailerName'", 500);
 				}
 			} else {
 				$stmt = $conn->prepare("INSERT INTO product_retailers (ProductID, RetailerID, Price, Stock) VALUES (?, ?, ?, ?)");
-				$stmt->bind_param("iidi", $data['ProductID'], $retailerID, $retailer['Price'], $retailer['Stock']);
+				$stmt->bind_param("iidi", $productID, $retailerID, $retailer['Price'], $retailer['Stock']);
 				if (!$stmt->execute()) {
 					$this->respond('error', "Failed to add retailer '$retailerName'", 500);
 				}
