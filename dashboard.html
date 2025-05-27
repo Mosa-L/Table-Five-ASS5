@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CompareIt - Product Dashboard</title>
+    <link rel="stylesheet" href="./style.css"/>
+    <script src="https://kit.fontawesome.com/a8501f958b.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div id="header" class="section-padding">
+        <img class="navlogo" src="./images/COMPAREIT Logo - Black with Transparent Background.svg" alt="CompareIt Logo"/>
+        <ul id="navbar">
+            <li><a href="index.html"><i class="fa-solid fa-house"></i></a></li>
+            <li><a href="compare.html">Compare</a></li>
+            <li><a href="favourites.html">Favourites</a></li>
+            <li><a href="manager.html">Manager</a></li>
+            <li><a class="active" href="dashboard.html">Dashboard</a></li>
+        </ul>
+    </div>
+
+    <section style="margin-top: 2%; margin-bottom: 5%;"><!--DO NOT CHANGE THIS STYLING-->
+        <div class="manager-dashboard-wrapper">
+            <h2 style="text-align:center;">Top Rated Products</h2>
+            <div id="top-products-grid" class="compare-container manager-products-grid" style="margin-bottom:40px;">
+                <div class="compare-product">
+                    <img src="./images/COMPAREIT Logo - Black with Transparent Background - 5000x5000.png" alt="Dell Inspiron 15">
+                    <div class="compare-desc">
+                        <h5>Chair</h5>
+                        <h4>Avg. Rating: <span style="color:gold;">4.8 ★</span></h4>
+                        <p style="font-size:13px; color:#888;">seating, chairs</p>
+                        <p style="font-size:13px; color:#888;">23 review(s)</p>
+                    </div>
+                </div>
+                <div class="compare-product">
+                    <img src="./images/COMPAREIT Logo - Black with White Background - 5000x5000.png" alt="Samsung Galaxy S23">
+                    <div class="compare-desc">
+                        <h5>Table</h5>
+                        <h4>Avg. Rating: <span style="color:gold;">4.7 ★</span></h4>
+                        <p style="font-size:13px; color:#888;">dining, tables</p>
+                        <p style="font-size:13px; color:#888;">19 review(s)</p>
+                    </div>
+                </div>
+                <div class="compare-product">
+                    <img src="./images/COMPAREIT Logo - Original - 5000x5000.png" alt="Sony WH-1000XM4">
+                    <div class="compare-desc">
+                        <h5>Couch</h5>
+                        <h4>Avg. Rating: <span style="color:gold;">4.6 ★</span></h4>
+                        <p style="font-size:13px; color:#888;">seating, couches</p>
+                        <p style="font-size:13px; color:#888;">15 review(s)</p>
+                    </div>
+                </div>
+                <div class="compare-product">
+                    <img src="./images/COMPAREIT Logo - Original with Transparent Background - 5000x5000.png" alt="Apple MacBook Air">
+                    <div class="compare-desc">
+                        <h5>TV Stand</h5>
+                        <h4>Avg. Rating: <span style="color:gold;">4.5 ★</span></h4>
+                        <p style="font-size:13px; color:#888;">electronics, televisions</p>
+                        <p style="font-size:13px; color:#888;">12 review(s)</p>
+                    </div>
+                </div>
+            </div>
+            <h2 style="text-align:center; margin-top: 7%; margin-bottom: 5%"><!--DO NOT CHANGE THIS STYLING-->Review Data Visualization</h2>
+            <div style="display:flex; justify-content:center;">
+                <div class="dashboard-review-chart-container">
+                    <div class="dashboard-review-bars-row">
+                        <div class="dashboard-review-bar">
+                            <div class="dashboard-review-bar-rect dashboard-review-bar-1" style="height:30px;"></div>
+                            <span class="dashboard-review-bar-label">1★</span>
+                            <span class="dashboard-review-bar-count">2</span>
+                        </div>
+                        <div class="dashboard-review-bar">
+                            <div class="dashboard-review-bar-rect dashboard-review-bar-2" style="height:50px;"></div>
+                            <span class="dashboard-review-bar-label">2★</span>
+                            <span class="dashboard-review-bar-count">4</span>
+                        </div>
+                        <div class="dashboard-review-bar">
+                            <div class="dashboard-review-bar-rect dashboard-review-bar-3" style="height:90px;"></div>
+                            <span class="dashboard-review-bar-label">3★</span>
+                            <span class="dashboard-review-bar-count">8</span>
+                        </div>
+                        <div class="dashboard-review-bar">
+                            <div class="dashboard-review-bar-rect dashboard-review-bar-4" style="height:160px;"></div>
+                            <span class="dashboard-review-bar-label">4★</span>
+                            <span class="dashboard-review-bar-count">16</span>
+                        </div>
+                        <div class="dashboard-review-bar">
+                            <div class="dashboard-review-bar-rect dashboard-review-bar-5" style="height:200px;"></div>
+                            <span class="dashboard-review-bar-label">5★</span>
+                            <span class="dashboard-review-bar-count">20</span>
+                        </div>
+                    </div>
+                    <div class="dashboard-review-chart-caption">Number of Reviews per Rating</div>
+                </div>
+            </div>
+        </div>
+    </section>
+	<script src="js/dashboard.js"></script>
+	<script src="js/navbar.js"></script>
+</body>
+</html>
