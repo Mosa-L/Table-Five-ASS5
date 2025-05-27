@@ -102,7 +102,8 @@ function showProductModal(edit = false, product = null) {
     document.getElementById('modalError').textContent = '';
     document.getElementById('productForm').reset();
     document.getElementById('editProductId').value = '';
-	document.getElementById('retailersList').innerHTML = '';
+    document.getElementById('retailersList').innerHTML = '';
+    document.getElementById('specList').innerHTML = '';
 
     if (edit && product) {
         document.getElementById('prodName').value = product.Title || '';
@@ -111,30 +112,39 @@ function showProductModal(edit = false, product = null) {
         document.getElementById('prodCategory').value = Array.isArray(product.Categories) ? product.Categories.join(', ') : (product.Categories || '');
         document.getElementById('prodDesc').value = product.Description || '';
         document.getElementById('editProductId').value = product.ProductID;
-		document.getElementById('prodImage').value = product.Image_url || '';
+        document.getElementById('prodImage').value = product.Image_url || '';
 
-		// Populate retailers if present
+        // Populate specs if present
+        if (product.Specs && Array.isArray(product.Specs)) {
+            product.Specs.forEach(s => {
+                addSpecField({
+                    type: s.type || s.Type || '',
+                    value: s.value || s.Value || ''
+                });
+            });
+        }
+
+        // Populate retailers if present
         if (product.Retailers && Array.isArray(product.Retailers)) {
             product.Retailers.forEach(r => {
                 addRetailerField({
                     name: r.Name || r.name || '',
-                    price: r.Price || r.price || ''
+                    price: r.Price || r.price || '',
+                    stock: r.Stock || r.stock || ''
                 });
             });
         }
     }
 }
 
+// Add stock input to retailer field
 function addRetailerField(retailer = {name: '', price: ''}) {
     const div = document.createElement('div');
     div.className = 'retailer-row';
-    div.style.display = 'flex';
-    div.style.gap = '8px';
-    div.style.marginBottom = '6px';
     div.innerHTML = `
-        <input type="text" class="retailer-name" placeholder="Retailer name" value="${retailer.name || ''}" style="flex:2; padding:6px; border-radius:5px; border:1px solid #ddd;">
-        <input type="number" class="retailer-price" placeholder="Price" min="0" step="0.01" value="${retailer.price || ''}" style="flex:1; padding:6px; border-radius:5px; border:1px solid #ddd;">
-        <button type="button" class="remove-retailer-btn" style="background:#d9534f; color:#fff; border:none; border-radius:5px; padding:0 10px; font-size:18px; cursor:pointer;">&times;</button>
+        <input type="text" class="retailer-name" placeholder="Retailer name" value="${retailer.name || ''}">
+        <input type="number" class="retailer-price" placeholder="Price" min="0" step="0.01" value="${retailer.price || ''}">
+        <button type="button" class="remove-retailer-btn">&times;</button>
     `;
     div.querySelector('.remove-retailer-btn').onclick = () => div.remove();
     document.getElementById('retailersList').appendChild(div);
@@ -142,6 +152,26 @@ function addRetailerField(retailer = {name: '', price: ''}) {
 
 document.getElementById('addRetailerBtn').onclick = function() {
     addRetailerField();
+};
+
+// Add spec input row
+function addSpecField(spec = {type: '', value: ''}) {
+    const div = document.createElement('div');
+    div.className = 'spec-row';
+    div.style.display = 'flex';
+    div.style.gap = '8px';
+    div.style.marginBottom = '6px';
+    div.innerHTML = `
+        <input type="text" class="spec-type" placeholder="Specification" value="${spec.type || ''}">
+        <input type="number" class="spec-value" placeholder="Value" value="${spec.value || ''}">
+        <button type="button" class="remove-spec-btn">&times;</button>
+    `;
+    div.querySelector('.remove-spec-btn').onclick = () => div.remove();
+    document.getElementById('specList').appendChild(div);
+}
+
+document.getElementById('addSpecBtn').onclick = function() {
+    addSpecField();
 };
 
 function hideProductModal() {
@@ -168,6 +198,12 @@ document.getElementById('productForm').onsubmit = function(e) {
     const editId = document.getElementById('editProductId').value;
     const imageUrl = document.getElementById('prodImage').value.trim();
 
+    // Gather specs
+    const specs = Array.from(document.querySelectorAll('#specList .spec-row')).map(row => ({
+        type: row.querySelector('.spec-type').value.trim(),
+        value: row.querySelector('.spec-value').value.trim()
+    })).filter(s => s.type && s.value);
+
     if (!title || !imageUrl || !brand || !category.length || !description || isNaN(price)) {
         document.getElementById('modalError').textContent = 'Please fill all fields.';
         return;
@@ -181,11 +217,10 @@ document.getElementById('productForm').onsubmit = function(e) {
         Brand: brand,
         Description: description,
         Image_url: imageUrl,
-        // For addProduct, ProductID is auto-generated by DB, so don't send it unless editing
         ...(editId ? { ProductID: editId } : {}),
-        // For now, just send as a string or array
         Categories: category,
-        Price: price
+        Price: price,
+        Specs: specs
     };
 
     fetch(API_URL, {
