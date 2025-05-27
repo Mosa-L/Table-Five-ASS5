@@ -896,6 +896,8 @@ class Api{
 		$conn = $this->conn;
 		$data = $this->data;
 		 //the rest of the fields are for the product_retailor table
+
+		 //add to specfifcations table
 		$accepted =['Title','apikey','Description','Image_url','Brand','RetailerID','Price','Stock'];
 
 		$requiredFields = ['apikey', 'Title', 'Description', 'Image_url', 'Brand', 'retailers', 'categories'];
@@ -997,6 +999,19 @@ class Api{
 				$stmt->bind_param("iidi", $productID, $retailerID, $retailer['Price'], $retailer['Stock']);
 				if (!$stmt->execute()) {
 					$this->respond('error', "Failed to add retailer '$retailerName'", 500);
+				}
+			}
+		}
+		
+		if (isset($data['specifications']) && is_array($data['specifications'])) {
+			foreach ($data['specifications'] as $spec) {
+				if (!isset($spec['SpecType']) || !isset($spec['SpecValue'])) {
+					$this->respond('error', 'Each specification must include SpecType and SpecValue', 400);
+				}
+				$stmt = $conn->prepare("INSERT INTO specifications (ProductID, SpecType, SpecValue) VALUES (?, ?, ?)");
+				$stmt->bind_param("iss", $productID, $spec['SpecType'], $spec['SpecValue']);
+				if (!$stmt->execute()) {
+					$this->respond('error', 'Failed to add specification', 500);
 				}
 			}
 		}
