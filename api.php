@@ -1474,6 +1474,11 @@ class Api{
 
 		$retailers=$product['Retailers'];
 
+		// If no retailers, return null or a default value
+		if (!is_array($retailers) || count($retailers) === 0) {
+			return null;
+		}
+
 		$lowest=$retailers[0]['Price'];
 
 		foreach($retailers as $r){
