@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CompareIt - Price Comparison</title>
+    <link rel="stylesheet" href="./style.css"/>
+    <script src="https://kit.fontawesome.com/a8501f958b.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div id="header" class="section-padding">
+       
+        <!-- Use SVG logo for CompareIt -->
+        <img class="navlogo" src="./images/COMPAREIT Logo - Black with Transparent Background.svg" alt="CompareIt Logo"/>
+        <ul id="navbar">
+            <li><a href="index.html"><i class="fa-solid fa-house"></i></a></li>
+            <li><a href="compare.html">Compare</a></li>
+            <li><a class="active" href="favourites.html">Favourites</a></li>
+            <li><a href="login.html">Login</a></li>
+            <li><a href="signup.html">Signup</a></li>
+        </ul>
+        
+    </div>
+
+    <div class="favHeading">
+        <h2>
+            Here's what you 
+            <span style="position: relative; display: inline-block;">
+                <span style="text-decoration: line-through; color: #888;">want</span>
+                <span style="position: absolute; left: 0; top: -1.2em; width: 100%; color: #222; font-weight: bold; font-size: 1.3em;">need</span>
+            </span>
+            
+        </h2>
+    </div>
+
+    <section id="favourites-grid">
+        <div class="favourites-container">
+            <div class="favourite-card">
+                <span class="remove-fav"><i class="fa-solid fa-xmark"></i></span>
+                <img src="./images/COMPAREIT Logo - Black with Transparent Background - 5000x5000.png" alt="Minimalistic stylish coffee table">
+                <div class="fav-desc">
+                    <h5>Minimalistic stylish coffee table</h5>
+                    <h4>$250</h4>
+                </div>
+                <a href="compare.html" class="compare-fav"><i class="fa-solid fa-arrow-right-arrow-left"></i></a>
+            </div>
+            <div class="favourite-card">
+                <span class="remove-fav"><i class="fa-solid fa-xmark"></i></span>
+                <img src="./images/COMPAREIT Logo - Black with White Background - 5000x5000.png" alt="Plank table">
+                <div class="fav-desc">
+                    <h5>Plank table</h5>
+                    <h4>$150</h4>
+                </div>
+                <a href="compare.html" class="compare-fav"><i class="fa-solid fa-arrow-right-arrow-left"></i></a>
+            </div>
+            <div class="favourite-card">
+                <span class="remove-fav"><i class="fa-solid fa-xmark"></i></span>
+                <img src="./images/COMPAREIT Logo - Original - 5000x5000.png" alt="Swiss dinner table">
+                <div class="fav-desc">
+                    <h5>Swiss dinner table</h5>
+                    <h4>$500</h4>
+                </div>
+                <a href="compare.html" class="compare-fav"><i class="fa-solid fa-arrow-right-arrow-left"></i></a>
+            </div>
+            <div class="favourite-card">
+                <span class="remove-fav"><i class="fa-solid fa-xmark"></i></span>
+                <img src="./images/COMPAREIT Logo - Original with Transparent Background - 5000x5000.png" alt="4 tier oak table">
+                <div class="fav-desc">
+                    <h5>4 tier oak table</h5>
+                    <h4>$250</h4>
+                </div>
+                <a href="compare.html" class="compare-fav"><i class="fa-solid fa-arrow-right-arrow-left"></i></a>
+            </div>
+            <div class="favourite-card">
+                <span class="remove-fav"><i class="fa-solid fa-xmark"></i></span>
+                <img src="./images/COMPAREIT Logo - White with Black Background - 5000x5000 (1).png" alt="White wood side drawer">
+                <div class="fav-desc">
+                    <h5>White wood side drawer</h5>
+                    <h4>$300</h4>
+                </div>
+                <a href="compare.html" class="compare-fav"><i class="fa-solid fa-arrow-right-arrow-left"></i></a>
+            </div>
+            <div class="favourite-card">
+                <span class="remove-fav"><i class="fa-solid fa-xmark"></i></span>
+                <img src="./images/COMPAREIT Logo - White with Black Background - 5000x5000.png" alt="Odd chair">
+                <div class="fav-desc">
+                    <h5>Odd chair</h5>
+                    <h4>$150</h4>
+                </div>
+                <a href="compare.html" class="compare-fav"><i class="fa-solid fa-arrow-right-arrow-left"></i></a>
+            </div>
+        </div>
+    </section>
+	<script src="js/favourites.js"></script>
+	<script src="js/navbar.js"></script>
+</body>
+</html>

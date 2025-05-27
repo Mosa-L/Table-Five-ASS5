@@ -1,0 +1,1384 @@
+/* Theme: CompareIt - Price Comparison Website
+    This stylesheet is adapted for CompareIt using the original design as a base.
+*/
+
+/*For the font*/
+@import url("https://fonts.googleapis.com/css2?family=Spartan:wght@100;200;300;400;500;600;700;800;900&display=swap");
+
+*{
+    font-family: "Spartan", sans-serif;
+    font-size: 16pt;
+    padding: 0;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+body{
+   background-image: url(images/IMG_0061.jpg);
+    
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+h1{
+    font-size: 50px;
+    line-height: 64px;
+    color: #222;
+}
+
+h2{
+    font-size: 46px;
+    margin: 30px 2px ;
+    line-height: 54px;
+    color: #222;
+}
+
+h4{
+    font-size: 20px;
+    color: #222;
+}
+
+h6{
+    font-weight: 700;
+    font-size: 50px;
+}
+
+p{
+    font-size: 16px;
+    color: #465b52;
+    margin: 15px 0 20px 0;
+}
+
+.section-padding {
+    padding: 40px 80px;
+}
+
+
+
+#homeButs {
+
+  top: 50px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  flex-basis: 40px;
+  gap: 15px;
+  position: absolute;
+  top: 75%;
+  color: black;
+}
+
+#homeButs a{
+    text-decoration: none;
+    color: black;
+}
+
+
+
+/*For Nav Bar*/
+
+
+
+.navlogo{
+
+    width:15%;
+    position: absolute;
+    left: 3%;
+    
+    /* SVG logo will scale nicely */
+}
+
+#header{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; 
+    padding: 40px 80px;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.06);/*adding shadow under nav bar*/
+    z-index: 1000;/*ensuring shadow shows*/
+    /*making nav bar stay fixed*/
+    position: sticky;
+    top: 0;
+    left: 0;
+}
+
+
+
+
+#navbar{
+    /*aligning nav bar comps in a row insted of colums*/
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+  
+  /*removing bullets from nav bar elements*/
+#navbar li{
+    list-style: none;
+    padding: 0 20px;
+    position: relative;
+}
+
+
+
+#navbar a{
+    color: black;
+    text-decoration: none;
+}
+
+#navbar a.active{/*this shows which page user is currently in by underlining the name on navbar*/
+    text-decoration: underline;
+    color: burlywood;
+}
+
+
+
+                    /*FOR PRODUCTS*/
+
+#products{
+    margin-top: 4%;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+} 
+
+#products .proCont{
+    display: flex;
+    justify-content:center;
+    gap: 55px;
+    padding: 20px;
+    flex-wrap: wrap;
+    margin-top: 3%;
+}
+
+#products .pro{
+    width: 17%;
+    height: 425px;
+    min-width: 250px;
+    padding: 10px 12px;
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 20px 20px 30px rgba(0, 0, 0, 0.09);
+    margin: 15px 0;
+    transition: 0.2s ease;/*smooth transition on hover*/
+    position: relative;
+    background-color: white;
+}
+
+#products .pro:hover{/*increasing hover effect*/
+    box-shadow: 20px 20px 30px rgba(0, 0, 0, 0.2);
+}
+
+#products .pro img{/*making image fit inside its assigned box*/
+    width: 90%;
+    height: 60%;
+    border-radius: 20px;
+}
+
+#products .pro .description{
+    text-align: start;/*this makes text start on the same side the box starts*/
+    padding: 10px 0;
+}
+
+#products .pro .description h5{
+    padding-top: 7px;
+    color: #1a1a1a;
+    font-size: 14px;
+}
+
+#products .pro .description h4{/*styling price*/
+    padding-top: 7px;
+    font-size: 15px;
+    font-weight: 700;
+    color: rgb(200, 133, 46);
+}
+
+#products .pro .compare{/*repsitioning and resizing compare icon*/
+    width: 60px;
+    height: 40px;
+    line-height: 40px;  
+    color: rgb(200, 133, 46);
+    position: absolute;/*every time we use absolute in child element, we have to put relative in parent element*/
+    bottom: 4.5%;
+    right: 20%;
+}
+
+#products .pro .favourites{/*repsitioning and resizing favourites button*/
+    width: 60px;
+    height: 40px;
+    line-height: 40px;  
+    color: rgb(200, 133, 46);
+    position: absolute;/*every time we use absolute in child element, we have to put relative in parent element*/
+    bottom: 4.5%;
+    right: 5%;
+}
+
+#products .pro .cart{/*repsitioning and resizing cart button*/
+    width: 60px;
+    height: 40px;
+    line-height: 40px;  
+    color: burlywood;
+    position: absolute;/*every time we use absolute in child element, we have to put relative in parent element*/
+    bottom: 4.5%;
+    right: 20%;
+}
+
+            /*For the search bar, button & filter & sort*/
+
+.searchCont{
+    display: flex;
+    align-items: center;
+    position: relative;
+    left: 30%;
+    width: 40%;
+    border: 2px solid burlywood;
+    border-radius: 25px;
+    overflow: hidden;
+}
+
+#searchInput{
+    flex: 1; /*grows to fit container*/
+    padding: 10px;
+    border: none;
+    outline: none;
+}
+
+#searchBut{
+    background: burlywood;
+    border: none;
+    padding: 10px;
+    color: black;
+}
+
+.filters{
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    position: relative;
+    left: 30%;
+    width: 40%;
+}
+
+.filters #category{
+    font-size: 12pt;
+    padding: 5px;
+    color: black;
+}
+
+.filters #price{
+    font-size: 12pt;
+    padding: 5px;
+    color: black;
+}
+
+
+
+
+#search{
+    flex: 1; /*grows to fit container*/
+    padding: 10px;
+    border: none;
+    outline: none;
+}
+
+
+#applyFilters{
+    background: burlywood;
+    border: none;
+    padding: 10px;
+    color: black;
+}
+
+select{
+    border: 2px solid burlywood;
+    border-radius: 25px;
+}
+
+
+
+                /*For the cart page*/
+
+#cart{
+    position: relative;
+    left: 5%;
+    width: 90%;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    background-color: #ffffff;
+    border-radius: 25px;
+    margin-top: 5%;
+}
+
+#cart table{
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    white-space: nowrap;
+}
+
+#cart table img{
+    width: 20%;
+    border-radius: 5px;
+}
+/*changing width of table columns*/
+#cart table td:nth-child(1){/*targeting 1st column using nth child*/
+    width: 40%;
+    text-align: center;
+}
+
+#cart table td:nth-child(2){/*targeting 2nd column using nth child*/
+    width: 60%;
+    text-align: center;
+}
+#cart table td:nth-child(3){
+    width: 40%;
+    text-align: center;
+}
+#cart table td:nth-child(4){
+    width: 40%;
+    text-align: center;
+}
+
+#cart table td:nth-child(5){
+    width: 40%;
+    text-align: center;
+}
+
+#cart table td:nth-child(6){
+    width: 30%;
+    text-align: center;
+}
+
+#cart table td:nth-child(4) input{/*styling the quantity box*/
+    width: 30%;
+    padding: 10px 5px 10px 15px;
+}
+
+#cart table thead{/*styling the header, adding lines*/
+    border: 1px solid burlywood;
+    border-left: none;
+    border-right: none;
+}
+
+#cart table thead td{/*making font and size of text better in header*/
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 13px;
+    padding: 18px 0;
+}
+
+#cart table tbody tr td{/*adding spacing between main body and header*/
+    padding: 15px;
+}
+
+#cart table tbody td{
+    font-size: 13px;
+}
+
+/*for the checkout table*/
+#checkout{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+#cartTotal{
+    border-radius: 25px;
+    width: 50%;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    border: 1px solid burlywood;
+    background-color: #ffffff;
+    padding: 30px;
+}
+
+#cartTotal table{
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+#cartTotal table td{
+    width: 50%;
+    border: 1px solid burlywood;
+    padding: 10px;
+    font-size: 13px;
+}
+
+button.checkBut{/*For the checkout button*/
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 20px;
+    color: #000;
+    background-color: burlywood;
+    border-radius: 4px;
+    border: none;
+    outline: none;
+    transition: 0.2s;
+}
+
+
+
+
+        /*Signup Form Styling*/
+
+#signup{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    
+}
+
+.form-container{
+    background-color: #ffffff;
+    padding: 50px;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    width: 35%;
+    
+    text-align: center;
+}
+
+.form-container h2{
+    margin-bottom: 20px;
+    font-size: 20pt;
+    color: #333;
+}
+
+.form-group{
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.form-group label{
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14pt;
+    color: #555;
+}
+
+.form-group input,
+.form-group select{
+    width: 100%;
+    padding: 10px;
+    font-size: 14pt;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.form-group button{
+    width: 50%;
+    padding: 10px;
+    font-size: 16pt;
+    background-color: burlywood;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.form-group.formBut{
+    text-align: center;
+}
+
+.form-group button:hover{
+    background-color: #d4a373;
+}
+
+.error-message{
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+
+                   /*For the compare page*/
+#compare-grid {
+    display: block;
+    width: 100%;
+    margin-top: 5%;
+}
+
+#compare-grid > .compare-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+    width: 90vw;
+    max-width: 1200px;
+    margin: 0 auto 32px auto;
+}
+
+.compare-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+    width: 90vw;
+    max-width: 1200px;
+    margin-bottom: 5%;
+    
+}
+
+.compare-product {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 350px;
+    padding: 24px 12px;
+    position: relative;
+}
+
+.compare-product.main-product {
+    min-height: 400px;
+    grid-row: 1;
+    grid-column: 1;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.compare-product img,
+.compare-product.main-product img {
+    width: 80%;
+    height: 180px;
+    object-fit: contain;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    border-radius: 10px;
+}
+
+.compare-desc {
+    text-align: center;
+}
+
+.compare-product.add-product {
+    background: #f7f7f7;
+    border: 2px dashed burlywood;
+    color: rgb(200, 133, 46);;
+    cursor: pointer;
+    min-height: 250px;
+    transition: background 0.2s;
+    justify-content: center;
+}
+
+.compare-product.add-product:hover {
+    background: #f2dabd;
+}
+
+.compare-product.add-product i {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.compare-product.add-product span {
+    font-size: 18px;
+    color: rgb(200, 133, 46);
+}
+
+.compare-table-container {
+    width: 95vw;
+    max-width: 1200px;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    padding: 32px 24px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 40px;
+    margin-top: 0;
+    overflow-x: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Make the table itself centered inside the container */
+.compare-table {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+    background: transparent;
+}
+
+.compare-table th,
+.compare-table td {
+    padding: 18px 14px;
+    text-align: center;
+    border-bottom: 1px solid #f3e9dd;
+}
+
+.compare-table th {
+    background: #f7f7f7;
+    color: #bfa06a;
+    font-size: 18px;
+    font-weight: 700;
+    border-top: none;
+    border-bottom: 2px solid #e5d3b3;
+}
+
+.compare-table-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.compare-table-header img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin-bottom: 4px;
+}
+
+.compare-table td {
+    background: #fff;
+    color: #444;
+    font-size: 15px;
+    vertical-align: middle;
+}
+
+.compare-table tr:last-child td {
+    border-bottom: none;
+}
+
+.search-result-item img {
+    width: 80px !important; 
+    height: 80px !important;
+    object-fit: contain;
+    border-radius: 10px;
+    background: #f7f7f7;
+    margin-right: 15px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.retailer-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.retailer-list li {
+    background: #f7f7f7;
+    color: rgb(200, 133, 46);
+    border-radius: 8px;
+    padding: 4px 10px;
+    margin: 4px 0;
+    display: inline-block;
+    font-size: 14px;
+}
+
+
+            /*For view*/
+#prodetails{
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 40px;
+    margin: 40px auto 0 auto;
+    max-width: 1100px;
+    background: #fff;
+    border-radius: 25px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    padding: 40px;
+}
+
+.single-pro-image{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.big-img{
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin-bottom: 18px;
+}
+
+.small-img-group{
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.small-img-col{
+    flex-basis: 24%;
+}
+
+.small-img{
+    border-radius: 10px;
+    border: 1px solid #eee;
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+.single-pro-details{
+    width: 100%;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.single-pro-details h2{
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.single-pro-details h4{
+    font-size: 20px;
+    margin: 10px 0 5px 0;
+    color: rgb(200, 133, 46);;
+}
+
+.single-pro-details p{
+    color: #444;
+    font-size: 16px;
+}
+
+.single-pro-details table{
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10px;
+}
+
+.single-pro-details table td{
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+    font-size: 15px;
+}
+
+.buy-link {
+    background: burlywood;
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.buy-link:hover {
+    background: #d4a373;
+}
+
+.reviews {
+    margin-bottom: 10px;
+}
+
+.review {
+    background: #f7f7f7;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+}
+
+.review-stars {
+    color: #bfa06a;
+    font-size: 18px;
+    margin-right: 8px;
+}
+
+.review-user {
+    color: #888;
+    font-size: 14px;
+    margin-right: 8px;
+}
+
+.review-form {
+    margin-top: 10px;
+    background: #f7f7f7;
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.review-form label {
+    font-size: 15px;
+    color: #333;
+}
+
+.review-form select,
+.review-form textarea {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 6px;
+    font-size: 15px;
+}
+
+.review-submit {
+    background: burlywood;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 6px;
+    align-self: flex-end;
+    transition: background 0.2s;
+}
+
+.review-submit:hover {
+    background: #d4a373;
+}
+                /* For the Favourites page */
+
+.favHeading{
+    text-align: center;
+    margin-top: 4%;
+    margin-bottom: 3%;
+    font-size: 30px;
+    color: #222;
+}
+#favourites-grid {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+}
+
+.favourites-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 32px;
+    width: 90vw;
+    max-width: 1200px;
+}
+
+.favourite-card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.09);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    padding: 18px 12px 24px 12px;
+    min-height: 320px;
+    transition: box-shadow 0.2s;
+}
+
+.favourite-card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.13);
+}
+
+.favourite-card img {
+    width: 80%;
+    height: 120px;
+    object-fit: contain;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    margin-top: 10px;
+}
+
+.fav-desc {
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+.fav-desc h5 {
+    font-size: 15px;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+}
+
+.fav-desc h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: burlywood;
+}
+
+.remove-fav {
+    position: absolute;
+    top: 12px;
+    right: 18px;
+    color: #bfa06a;
+    font-size: 22px;
+    cursor: pointer;
+    z-index: 2;
+    transition: color 0.2s;
+}
+
+.remove-fav:hover {
+    color: #d9534f;
+}
+
+.compare-fav {
+    position: absolute;
+    bottom: 18px;
+    right: 18px;
+    color: burlywood;
+    font-size: 22px;
+    transition: color 0.2s;
+}
+
+.compare-fav:hover {
+    color: #bfa06a;
+}
+
+#compare-table-section {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+}
+
+                            /* Manager Dashboard Modal & Product Card Buttons */
+.manager-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.25);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 24px 0;
+}
+
+.manager-modal.show {
+    display: flex;
+}
+
+#productModal .form-container {
+    width: 95vw;
+    max-width: 420px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.13);
+    padding: 32px 20px 24px 20px;
+    margin: 0 auto;
+    top: 0;
+    left: 0;
+}
+
+#productModal #closeModal {
+    position: absolute;
+    top: 18px;
+    right: 24px;
+    font-size: 24px;
+    color: #bfa06a;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.manager-action-btns {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    justify-content: center;
+}
+
+.manager-action-btns .edit-btn,
+.manager-action-btns .delete-btn {
+    background: burlywood;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 16px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.manager-action-btns .edit-btn:hover {
+    background: #d4a373;
+}
+
+.manager-action-btns .delete-btn {
+    background: #d9534f;
+}
+
+.manager-action-btns .delete-btn:hover {
+    background: #b52a23;
+}
+
+#imagePreview img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+/* Manager Dashboard Layout */
+.manager-dashboard-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 0 0 0;
+}
+
+.manager-controls-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.manager-search-bar {
+    flex: 2 1 350px;
+    min-width: 250px;
+    margin: 0;
+    position: static;
+    left: 0;
+    width: auto;
+    border: 2px solid burlywood;
+    border-radius: 25px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.manager-search-bar input {
+    font-size: 15pt;
+    background: transparent;
+    width: 100%;
+    padding: 10px 12px;
+    border-color: transparent;
+}
+
+.manager-search-bar button {
+    background: burlywood;
+    border: none;
+    padding: 10px 18px;
+    color: #222;
+    font-size: 16pt;
+    border-radius: 0 25px 25px 0;
+    transition: background 0.2s;
+}
+
+.manager-search-bar button:hover {
+    background: #d4a373;
+}
+
+.manager-filters {
+    flex: 1 1 180px;
+    min-width: 150px;
+    margin: 0;
+    position: static;
+    left: 0;
+    width: auto;
+    
+}
+
+.manager-filters select {
+    width: 100%;
+    font-size: 15pt;
+    padding: 8px 12px;
+    border-radius: 25px;
+    border: 2px solid burlywood;
+    background: #fff;
+    color: #222;
+    padding: 10px 12px;
+}
+
+/* Fix search and filters alignment in manager dashboard */
+.manager-dashboard-wrapper .searchCont,
+.manager-dashboard-wrapper .filters {
+    position: static !important;
+    left: unset !important;
+    width: auto !important;
+    margin: 0;
+    flex: 1 1 0;
+    min-width: 200px;
+    max-width: 500px;
+}
+
+.manager-dashboard-wrapper .filters {
+    margin-left: 16px;
+    flex: 0 0 220px;
+    max-width: 220px;
+}
+
+.manager-controls-row {
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+/* Manager Products Grid */
+.manager-products-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 32px;
+    margin-top: 0;
+    width: 100%;
+}
+
+/* Modal Styling */
+.manager-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.25);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+}
+
+.manager-modal.show {
+    display: flex;
+}
+
+.manager-modal .form-container {
+    width: 95vw;
+    max-width: 420px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.13);
+    padding: 32px 20px 24px 20px;
+    margin: 0 auto;
+    top: 0;
+    left: 0;
+}
+
+.manager-modal-close {
+    position: absolute;
+    top: 18px;
+    right: 24px;
+    font-size: 24px;
+    color: #bfa06a;
+    cursor: pointer;
+    z-index: 10;
+    transition: color 0.2s;
+}
+
+.manager-modal-close:hover {
+    color: #d9534f;
+}
+
+/* Retailer input row styling for manager modal */
+#retailersList {
+    margin-bottom: 8px;
+}
+
+.retailer-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.retailer-row .retailer-name {
+    flex: 2 1 0;
+    min-width: 0;
+    padding: 10px 12px;
+    font-size: 15pt;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #faf9f7;
+}
+
+.retailer-row .retailer-price {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 10px 12px;
+    font-size: 15pt;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #faf9f7;
+}
+
+.retailer-row .retailer-stock{
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 10px 12px;
+    font-size: 15pt;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #faf9f7;
+}
+
+.retailer-row .remove-retailer-btn {
+    flex: 0 0 auto;
+    background: #d9534f;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+    line-height: 32px;
+    text-align: center;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+    transition: background 0.2s;
+}
+
+.retailer-row .remove-retailer-btn:hover {
+    background: #b52a23;
+}
+
+                /* For Dashboard Top Rated Products and Review Chart */
+.dashboard-review-chart-container {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    padding: 32px 40px;
+    width: 700px;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.dashboard-review-bars-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 32px;
+    height: 220px;
+    margin-bottom: 24px;
+}
+
+.dashboard-review-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.dashboard-review-bar-rect {
+    width: 40px;
+    border-radius: 8px 8px 0 0;
+    margin-bottom: 4px;
+}
+
+.dashboard-review-bar-1 { background: red; }
+.dashboard-review-bar-2 { background: orange; }
+.dashboard-review-bar-3 { background: yellow; }
+.dashboard-review-bar-4 { background: yellowgreen; }
+.dashboard-review-bar-5 { background: green; }
+
+.dashboard-review-bar-label {
+    font-size: 15px;
+    color: #bd9a5e;
+}
+
+.dashboard-review-bar-count {
+    font-size: 13px;
+    color: #888;
+}
+
+.dashboard-review-chart-caption {
+    text-align: center;
+    color: #888;
+    font-size: 15px;
+}
+
+/* Compare page: Modal styling for search */
+.search-modal {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.25);
+    z-index: 3000;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 80px;
+}
+
+.search-modal .modal-content {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.13);
+    padding: 40px 32px 32px 32px;
+    min-width: 420px;
+    max-width: 95vw;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.search-modal .close-modal {
+    position: absolute;
+    top: 18px;
+    right: 24px;
+    font-size: 24px;
+    color: #bfa06a;
+    cursor: pointer;
+    z-index: 10;
+    transition: color 0.2s;
+}
+
+.search-modal .close-modal:hover {
+    color: #d9534f;
+}
+
+.search-modal h2 {
+    text-align: center;
+    margin-bottom: 18px;
+    font-size: 22pt;
+    color: #333;
+}
+
+.search-modal .searchCont {
+    display: flex;
+    align-items: center;
+    border: 2px solid burlywood;
+    border-radius: 25px;
+    overflow: hidden;
+    margin-bottom: 18px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.search-modal .searchCont input[type="text"] {
+    flex: 1;
+    padding: 10px 14px;
+    border: none;
+    outline: none;
+    font-size: 15pt;
+    background: transparent;
+}
+
+.search-modal .searchCont button {
+    background: burlywood;
+    border: none;
+    padding: 10px 18px;
+    color: #222;
+    font-size: 16pt;
+    border-radius: 0 25px 25px 0;
+    transition: background 0.2s;
+}
+
+.search-modal .searchCont button:hover {
+    background: #d4a373;
+}
+
+.search-modal .search-results {
+    margin-top: 10px;
+    min-height: 40px;
+}
+
+.avg-rating{
+    color: rgb(200, 133, 46)
+}
+

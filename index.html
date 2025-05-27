@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CompareIt - Price Comparison</title>
+    <link rel="stylesheet" href="./style.css"/>
+    <script src="https://kit.fontawesome.com/a8501f958b.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div id="header" class="section-padding">
+       
+        <!-- Use SVG logo for CompareIt -->
+        <img class="navlogo" src="./images/COMPAREIT Logo - Black with Transparent Background.svg" alt="CompareIt Logo"/>
+        <ul id="navbar">
+            <li><a class="active" href="index.html"><i class="fa-solid fa-house"></i></a></li>
+            <li><a href="compare.html">Compare</a></li>
+            <li><a href="favourites.html">Favourites</a></li>
+            <li><a href="login.html">Login</a></li>
+            <li><a href="signup.html">Signup</a></li>
+        </ul>
+        
+    </div>
+
+    <!-- Main Content -->
+    <section id="products">
+        <h2>
+            Welcome to CompareIt!<br>
+            Your smart price comparison tool 🛒
+        </h2>
+        <h4>Find the best deals across top stores!</h4>
+        <p>
+            Compare prices, features, and reviews for thousands of products.<br>
+            Save money and shop smarter with <strong>CompareIt</strong>
+        </p>
+
+        <!-- Search Bar -->
+        <div class="searchCont">
+            <input type="text" id="searchInput" placeholder="Search for products">
+            <button id="searchBut"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </div>
+
+        <!-- Filters and Sort -->
+        <div class="filters">
+            <select id="category">
+                <option value="">All Categories</option>
+                <option value="electronics">Electronics</option>
+                <option value="appliances">Appliances</option>
+                <option value="fashion">Fashion</option>
+            </select>
+            <select id="brand">
+                <option value="">Brands</option>
+            </select>
+            <select id="retailer">
+                <option value="">Retailers</option>
+            </select>
+            <select id="price">
+                <option value="">Sort Price</option>
+                <option value="low">Low to High</option>
+                <option value="high">High to Low</option>
+            </select>
+        </div>
+
+        <!-- Example Product Cards -->
+        <div class="proCont">
+            <div class="pro">
+                <img src="./images/COMPAREIT Logo - Black with Transparent Background - 5000x5000.png" alt="Laptop">
+                <div class="description">
+                    <h5>Dell Inspiron 15</h5>
+                    <h4>From R13 000</h4>
+                </div>
+                <a href="compare.html"><i class="fa-solid fa-arrow-right-arrow-left compare"></i></a>
+                <a href="favourites.html"><i class="fa-regular fa-heart favourites"></i></a>
+            </div>
+            <div class="pro">
+                <img src="./images/COMPAREIT Logo - Black with White Background - 5000x5000.png" alt="Smartphone">
+                <div class="description">
+                    <h5>Samsung Galaxy S23</h5>
+                    <h4>From R16 000</h4>
+                </div>
+                <a href="compare.html"><i class="fa-solid fa-arrow-right-arrow-left compare"></i></a>
+                <a href="favourites.html"><i class="fa-regular fa-heart favourites"></i></a>
+            </div>
+            <div class="pro">
+                <img src="./images/COMPAREIT Logo - Original - 5000x5000.png" alt="Headphones">
+                <div class="description">
+                    <h5>Sony WH-1000XM4</h5>
+                    <h4>From R10 000</h4>
+                </div>
+                <a href="compare.html"><i class="fa-solid fa-arrow-right-arrow-left compare"></i></a>
+                <a href="favourites.html"><i class="fa-regular fa-heart favourites"></i></a>
+            </div>
+            <div class="pro">
+                <img src="./images/COMPAREIT Logo - Original with Transparent Background - 5000x5000.png" alt="Headphones">
+                <div class="description">
+                    <h5>Sony WH-1000XM4</h5>
+                    <h4>From R10 000</h4>
+                </div>
+                <a href="compare.html"><i class="fa-solid fa-arrow-right-arrow-left compare"></i></a>
+                <a href="favourites.html"><i class="fa-regular fa-heart favourites"></i></a>
+            </div>
+            <div class="pro">
+                <img src="./images/COMPAREIT Logo - White with Black Background - 5000x5000.png" alt="Headphones">
+                <div class="description">
+                    <h5>Sony WH-1000XM4</h5>
+                    <h4>From R10 000</h4>
+                </div>
+                <a href="compare.html"><i class="fa-solid fa-arrow-right-arrow-left compare"></i></a>
+                <a href="favourites.html"><i class="fa-regular fa-heart favourites"></i></a>
+            </div>
+            <!-- ...add more product cards as needed... -->
+        </div>
+    </section>
+    <script src="js/index.js"></script>
+	<script src="js/navbar.js"></script>
+</body>
+</html>
