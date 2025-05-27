@@ -2,7 +2,7 @@
 // ini_set('display_errors', 1);
 // ini_set('display_startup_errors', 1);
 // error_reporting(E_ALL);
-	include_once "config.php";
+include_once "config.php";
 
 class Api{
 
@@ -10,12 +10,14 @@ class Api{
 
 	private $data;
 
+	// Constructor to initialize the database connection and parse request data
 	public function __construct($dbConn){
 
 		$this->conn=$dbConn;
 		$this->parseRequestData();
 	}
 
+	// Main function to handle the API request
 	private function parseRequestData(){
 
 		$contentType=$_SERVER['CONTENT_TYPE'] ?? $_SERVER['HTTP_CONTENT_TYPE'] ?? '';
@@ -38,6 +40,7 @@ class Api{
 
 	}
 
+	//
 	private function respond($status, $message, $code){
 		http_response_code($code);
 		header('Content-Type: application/json');
@@ -730,8 +733,7 @@ class Api{
 	private function handleFavourites(){//this function will add the users fav
 		
 		$data=$this->data;
-		$conn=$this->conn;
-	//probably need a an api key request 
+		$conn=$this->conn; 
 		if(!isset($data['apikey'])||!$this->checkApiKey($data['apikey'])){	
 			$this->respond('error',"Apikey missing or invalid",401);
 		}	
@@ -756,9 +758,7 @@ class Api{
 		}else{
 
 			$this->respond('error',"User not found",403);
-		}
-		//now that user is found we can use the userID to add to the favourites table 
-		//but product id ?
+		} 
 		$stmt = $conn->prepare("INSERT INTO favourites (UserID, ProductId, Date_Added) VALUES (?, ?, NOW())");
 		$stmt->bind_param("ii", $userID, $productID);
 
@@ -770,6 +770,7 @@ class Api{
 		}
 
 	}
+
 	private function handleFavouriteProducts(){
 		//will return an array of productids and then they can be used in the product table to return the persons favourite
 		//the apikey should be sufficient in this case 
@@ -880,7 +881,6 @@ class Api{
 			$this->respond('error',"User not found",403);
 		}
 
-		//now that you have userID how to go about deletion ?
 		$stmt = $conn->prepare("DELETE FROM favourites WHERE UserID = ? AND ProductID = ?");
 		$stmt->bind_param("ii", $userID,$data['ProductID']);
 		$stmt->execute();
@@ -895,12 +895,8 @@ class Api{
 	private function handleAddProduct() {
 		$conn = $this->conn;
 		$data = $this->data;
-		 //the rest of the fields are for the product_retailor table
 
-		 //add to specfifcations table
-		$accepted =['Title','apikey','Description','Image_url','Brand','RetailerID','Price','Stock'];
-
-		$requiredFields = ['apikey', 'Title', 'Description', 'Image_url', 'Brand', 'retailers', 'categories'];
+		$requiredFields = ['apikey', 'Title', 'Description', 'Image_url', 'Brand', 'retailers', 'categories', 'Specs'];
 		foreach ($requiredFields as $field) {
 			if (!isset($data[$field])) {
 				$this->respond("error", "$field missing", 400);
@@ -913,11 +909,15 @@ class Api{
 		if (!is_array($data['categories']) || count($data['categories']) === 0) {
 			$this->respond("error", "Categories must be a non-empty array", 400);
 		}
+		if (!is_array($data['Specs'])) {
+			$this->respond("error", "Specs must be an array", 400);
+		}
 
 		if (!$this->checkApiKey($data['apikey'])) {
 			$this->respond('error', 'Invalid or missing apikey', 403);
 		}
 
+		// Only managers can add products
 		$stmt = $conn->prepare("SELECT Type FROM users WHERE Api_key = ?");
 		$stmt->bind_param("s", $data['apikey']);
 		$stmt->execute();
@@ -930,13 +930,13 @@ class Api{
 			$this->respond('error', "User not found", 403);
 		}
 
+		// Insert product
 		$stmt = $conn->prepare("INSERT INTO products (Title, Description, Image_url, Brand) VALUES (?, ?, ?, ?)");
 		$stmt->bind_param("ssss", $data['Title'], $data['Description'], $data['Image_url'], $data['Brand']);
 		if (!$stmt->execute()) {
 			$this->respond('error', 'Failed to add product to products table', 500);
 		}
-		$productID = $conn->insert_id; 
-
+		$productID = $conn->insert_id;
 
 		// Add categories
 		foreach ($data['categories'] as $categoryName) {
@@ -964,6 +964,16 @@ class Api{
 			}
 		}
 
+		// Add specs
+		foreach ($data['Specs'] as $spec) {
+			if (!isset($spec['type']) || !isset($spec['value'])) continue;
+			$stmt = $conn->prepare("INSERT INTO specifications (ProductID, SpecType, SpecValue) VALUES (?, ?, ?)");
+			$stmt->bind_param("iss", $productID, $spec['type'], $spec['value']);
+			if (!$stmt->execute()) {
+				$this->respond('error', "Failed to add specification '{$spec['type']}'", 500);
+			}
+		}
+
 		// Handle retailers
 		foreach ($data['retailers'] as $retailer) {
 			if (!isset($retailer['RetailerName']) || !isset($retailer['Price']) || !isset($retailer['Stock'])) {
@@ -983,42 +993,16 @@ class Api{
 			$row = $result->fetch_assoc();
 			$retailerID = $row['RetailerID'];
 
-			// Check if entry exists
-			$stmt = $conn->prepare("SELECT * FROM product_retailers WHERE ProductID = ? AND RetailerID = ?");
-			$stmt->bind_param("ii", $productID, $retailerID);
-			$stmt->execute();
-			$result = $stmt->get_result();
-			if ($result->num_rows > 0) {
-				$stmt = $conn->prepare("UPDATE product_retailers SET Price = ?, Stock = ? WHERE ProductID = ? AND RetailerID = ?");
-				$stmt->bind_param("diii", $retailer['Price'], $retailer['Stock'], $productID, $retailerID);
-				if (!$stmt->execute()) {
-					$this->respond('error', "Failed to update retailer '$retailerName'", 500);
-				}
-			} else {
-				$stmt = $conn->prepare("INSERT INTO product_retailers (ProductID, RetailerID, Price, Stock) VALUES (?, ?, ?, ?)");
-				$stmt->bind_param("iidi", $productID, $retailerID, $retailer['Price'], $retailer['Stock']);
-				if (!$stmt->execute()) {
-					$this->respond('error', "Failed to add retailer '$retailerName'", 500);
-				}
-			}
-		}
-		
-		if (isset($data['specifications']) && is_array($data['specifications'])) {
-			foreach ($data['specifications'] as $spec) {
-				if (!isset($spec['SpecType']) || !isset($spec['SpecValue'])) {
-					$this->respond('error', 'Each specification must include SpecType and SpecValue', 400);
-				}
-				$stmt = $conn->prepare("INSERT INTO specifications (ProductID, SpecType, SpecValue) VALUES (?, ?, ?)");
-				$stmt->bind_param("iss", $productID, $spec['SpecType'], $spec['SpecValue']);
-				if (!$stmt->execute()) {
-					$this->respond('error', 'Failed to add specification', 500);
-				}
+			// Insert into product_retailers
+			$stmt = $conn->prepare("INSERT INTO product_retailers (ProductID, RetailerID, Price, Stock) VALUES (?, ?, ?, ?)");
+			$stmt->bind_param("iidi", $productID, $retailerID, $retailer['Price'], $retailer['Stock']);
+			if (!$stmt->execute()) {
+				$this->respond('error', "Failed to add retailer '$retailerName'", 500);
 			}
 		}
 
-		$this->respond('success', 'Product, retailers, and categories added/updated successfully', 200);
+		$this->respond('success', 'Product, retailers, categories, and specs added successfully', 200);
 	}
-
 
 	private function handleDeleteProduct(){
 
@@ -1072,62 +1056,81 @@ class Api{
 	}
 
 	private function handleLogin(){
-		$data=$this->data;
-		$conn =$this->conn;
+		$data = $this->data;
+		$conn = $this->conn;
 
-		$email;
-		$password;
-
-		$accepted =['type','email','password'];
-
-		foreach($data as  $attr=>$value){
+		$accepted = ['type','email','password'];
+		foreach($data as $attr=>$value){
 			if(!in_array($attr,$accepted)){
-				$this->respond("error","Invalid Parameter",400);//checks if the data recived from the json is valid for the login request to be done 
+				$this->respond("error","Invalid Parameter",400);
 			}
 		}
 
 		if(!isset($data['email'])||!$this->validateEmail($data['email'])){
-
 			$this->respond("error","Invalid or missing email",400);
 		}
-
 		if(!isset($data['password'])){
-
 			$this->respond("error","Password missing",400);
 		}
 
-		$password=$data['password'];
+		$email = $data['email'];
+		$password = $data['password'];
 
-		if(!$this->userExists($data['email'])){
-
+		if(!$this->userExists($email)){
 			$this->respond("error","User does not exist",401);
 		}
 
-		$email=$data['email'];
-
-		$stmt=$conn->prepare("SELECT FirstName,LastName,Api_key,Password,Type FROM users WHERE email=?");
-
+		// Fetch user info including failed attempts and lockout
+		$stmt = $conn->prepare("SELECT FirstName,LastName,Api_key,Password,Type,failed_attempts,locked_until,lockout_duration FROM users WHERE email=?");
 		$stmt->bind_param("s",$email);
 
 		if($stmt->execute()){
-
-			$stmt->bind_result($Firstname,$Lastname,$Api_key,$hashedPassword,$user_type);
-		
+			$stmt->bind_result($Firstname,$Lastname,$Api_key,$hashedPassword,$user_type,$failed_attempts,$locked_until,$lockout_duration);
 			if($stmt->fetch()){
-
-				if(password_verify($password,$hashedPassword)) {
-					
-					$this->respond("success",[['apikey'=>$Api_key,'name'=>$Firstname, 'surname'=>$Lastname, 'user_type'=>$user_type]],200);
-
-				}else{
-					
-					$this->respond("error","Password incorrect",400);
+				// Check if user is locked out
+				if ($locked_until && strtotime($locked_until) > time()) {
+					$stmt->close();
+					$remaining = strtotime($locked_until) - time();
+					$minutes = ceil($remaining / 60);
+					$this->respond("error","Account locked. Try again in $minutes minute(s).", 403);
 				}
 
-			}
+				if(password_verify($password,$hashedPassword)) {
+					$stmt->close();
+					// Reset failed attempts and lockout duration on success
+					$stmt2 = $conn->prepare("UPDATE users SET failed_attempts=0, locked_until=NULL, lockout_duration=600 WHERE email=?");
+					$stmt2->bind_param("s", $email);
+					$stmt2->execute();
+					$stmt2->close();
 
-		}else{
-			
+					$this->respond("success",[['apikey'=>$Api_key,'name'=>$Firstname, 'surname'=>$Lastname, 'user_type'=>$user_type]],200);
+				} else {
+					$stmt->close();
+					// Increment failed attempts
+					$failed_attempts++;
+					$new_lockout_duration = $lockout_duration ?: 600; // default 10 min
+
+					if ($failed_attempts >= 3) {
+						// Lock for current duration, then triple it for next time
+						$lockout = date('Y-m-d H:i:s', time() + $new_lockout_duration);
+						$next_duration = $new_lockout_duration * 3;
+						$stmt2 = $conn->prepare("UPDATE users SET failed_attempts=0, locked_until=?, lockout_duration=? WHERE email=?");
+						$stmt2->bind_param("sis", $lockout, $next_duration, $email);
+						$stmt2->execute();
+						$stmt2->close();
+						$minutes = ceil($new_lockout_duration / 60);
+						$this->respond("error","Too many failed attempts. Account locked for $minutes minute(s).",403);
+					} else {
+						$stmt2 = $conn->prepare("UPDATE users SET failed_attempts=? WHERE email=?");
+						$stmt2->bind_param("is", $failed_attempts, $email);
+						$stmt2->execute();
+						$stmt2->close();
+						$this->respond("error","Password incorrect. ".(3-$failed_attempts)." attempt(s) left.",400);
+					}
+				}
+			}
+			$stmt->close();
+		} else {
 			$this->respond('error', $stmt->error, 500);
 		}
 	}
@@ -1244,6 +1247,7 @@ class Api{
 		}
 
 	}
+
 	private function handleEditProduct(){
 		$data = $this->data;
 		$conn = $this->conn;
@@ -1255,6 +1259,7 @@ class Api{
 
 		$productID = $data['ProductID'];
 
+		// Check if product exists
 		$stmt = $conn->prepare("SELECT * FROM products WHERE ProductID = ?");
 		$stmt->bind_param("i", $productID);
 		$stmt->execute();
@@ -1265,6 +1270,7 @@ class Api{
 			return;
 		}
 
+		// Update main product fields
 		$fieldsToUpdate = [];
 		$params = [];
 		$types = "";
@@ -1274,16 +1280,19 @@ class Api{
 			$params[] = $data['Title'];
 			$types .= "s";
 		}
-
 		if (isset($data['Description'])) {
 			$fieldsToUpdate[] = "Description = ?";
 			$params[] = $data['Description'];
 			$types .= "s";
 		}
-
 		if (isset($data['Image_url'])) {
 			$fieldsToUpdate[] = "Image_url = ?";
 			$params[] = $data['Image_url'];
+			$types .= "s";
+		}
+		if (isset($data['Brand'])) {
+			$fieldsToUpdate[] = "Brand = ?";
+			$params[] = $data['Brand'];
 			$types .= "s";
 		}
 
@@ -1291,40 +1300,97 @@ class Api{
 			$query = "UPDATE products SET " . implode(", ", $fieldsToUpdate) . " WHERE ProductID = ?";
 			$params[] = $productID;
 			$types .= "i";
-
 			$stmt = $conn->prepare($query);
 			$stmt->bind_param($types, ...$params);
 			$stmt->execute();
 		}
 
-		if (isset($data['Retailers']) && is_array($data['Retailers'])){
-			foreach ($data['Retailers'] as $retailerData){
-				if(!isset($retailerData['RetailerID'], $retailerData['Price'])){
-					continue; 
+		// Update categories
+		if (isset($data['categories']) && is_array($data['categories'])) {
+			// Remove old categories
+			$stmt = $conn->prepare("DELETE FROM product_categories WHERE ProductID = ?");
+			$stmt->bind_param("i", $productID);
+			$stmt->execute();
+
+			// Add new categories
+			foreach ($data['categories'] as $categoryName) {
+				$stmt = $conn->prepare("SELECT CategoryID FROM categories WHERE Name = ?");
+				$stmt->bind_param("s", $categoryName);
+				$stmt->execute();
+				$result = $stmt->get_result();
+				if ($result && $row = $result->fetch_assoc()) {
+					$categoryID = $row['CategoryID'];
+					$stmt2 = $conn->prepare("INSERT INTO product_categories (ProductID, CategoryID) VALUES (?, ?)");
+					$stmt2->bind_param("ii", $productID, $categoryID);
+					$stmt2->execute();
+					$stmt2->close();
+				}
+			}
+		}
+
+		// Update specs
+		if (isset($data['Specs']) && is_array($data['Specs'])) {
+			// Remove old specs
+			$stmt = $conn->prepare("DELETE FROM specifications WHERE ProductID = ?");
+			$stmt->bind_param("i", $productID);
+			$stmt->execute();
+
+			// Add new specs
+			foreach ($data['Specs'] as $spec) {
+				if (!isset($spec['type']) || !isset($spec['value'])) continue;
+				$stmt2 = $conn->prepare("INSERT INTO specifications (ProductID, SpecType, SpecValue) VALUES (?, ?, ?)");
+				$stmt2->bind_param("iss", $productID, $spec['type'], $spec['value']);
+				$stmt2->execute();
+				$stmt2->close();
+			}
+		}
+
+		// Update retailers (price and stock)
+		if (isset($data['retailers']) && is_array($data['retailers'])){
+			foreach ($data['retailers'] as $retailerData){
+				// Accept either RetailerID or RetailerName
+				if (isset($retailerData['RetailerID'])) {
+					$retailerID = $retailerData['RetailerID'];
+				} else if (isset($retailerData['RetailerName'])) {
+					$stmt = $conn->prepare("SELECT RetailerID FROM retailers WHERE RetailerName = ?");
+					$stmt->bind_param("s", $retailerData['RetailerName']);
+					$stmt->execute();
+					$result = $stmt->get_result();
+					if ($result && $row = $result->fetch_assoc()) {
+						$retailerID = $row['RetailerID'];
+					} else {
+						continue;
+					}
+				} else {
+					continue;
 				}
 
-				$retailerID = $retailerData['RetailerID'];
-				$price = $retailerData['Price'];
+				$price = isset($retailerData['Price']) ? $retailerData['Price'] : null;
+				$stock = isset($retailerData['Stock']) ? $retailerData['Stock'] : null;
+				if ($price === null || $stock === null) continue;
 
+				// Check if entry exists
 				$checkStmt = $conn->prepare("SELECT * FROM product_retailers WHERE ProductID = ? AND RetailerID = ?");
 				$checkStmt->bind_param("ii", $productID, $retailerID);
 				$checkStmt->execute();
 				$existing = $checkStmt->get_result();
 
 				if ($existing->num_rows > 0){
-					$updateStmt = $conn->prepare("UPDATE product_retailers SET Price = ? WHERE ProductID = ? AND RetailerID = ?");
-					$updateStmt->bind_param("dii", $price, $productID, $retailerID);
+					$updateStmt = $conn->prepare("UPDATE product_retailers SET Price = ?, Stock = ? WHERE ProductID = ? AND RetailerID = ?");
+					$updateStmt->bind_param("diii", $price, $stock, $productID, $retailerID);
 					$updateStmt->execute();
-				}else{
-					
-					$insertStmt = $conn->prepare("INSERT INTO product_retailers (ProductID, RetailerID, Price) VALUES (?, ?, ?)");
-					$insertStmt->bind_param("iid", $productID, $retailerID, $price);
+					$updateStmt->close();
+				} else {
+					$insertStmt = $conn->prepare("INSERT INTO product_retailers (ProductID, RetailerID, Price, Stock) VALUES (?, ?, ?, ?)");
+					$insertStmt->bind_param("iidi", $productID, $retailerID, $price, $stock);
 					$insertStmt->execute();
+					$insertStmt->close();
 				}
+				$checkStmt->close();
 			}
 		}
 
-    	$this->respond("success", "Product updated successfully", 200);
+		$this->respond("success", "Product updated successfully", 200);
 	}
 
 	private function handleAddReview(){
