@@ -1358,3 +1358,7 @@ button.checkBut{/*For the checkout button*/
     min-height: 40px;
 }
 
+.avg-rating{
+    color: rgb(200, 133, 46)
+}
+

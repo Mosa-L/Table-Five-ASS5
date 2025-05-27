@@ -4,7 +4,7 @@ var productContainer = document.querySelector('.proCont');  //container where pr
 var navBar = document.getElementById('navbar');
 var favouriteIDs = [];
 
-//function to fetch user's favourites and check if they exist before adding 
+//fetch user's favourites and check if they exist before adding 
 function fetchFavouritesList(callback) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', API_URL, true);
@@ -27,6 +27,56 @@ function fetchFavouritesList(callback) {
         apikey: apiKey
     }));
 }
+
+function fetchDistinct(field, populateFn) {
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', API_URL, true);
+  xhr.setRequestHeader('Content-Type','application/json');
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState !== 4) return;
+    try {
+      var res = JSON.parse(xhr.responseText);
+      if (res.status === 'success') {
+        populateFn(res.data);
+      } else {
+        console.error('Could not load ' + field + 's:', res.data);
+      }
+    } catch(e) {
+      console.error(field + ' parse error:', xhr.responseText);
+    }
+  };
+  xhr.send(JSON.stringify({
+    type:   'GetDistinct',
+    apikey: apiKey,
+    field:  field
+  }));
+}
+
+function populateBrandDropdown(brands) {
+  var sel = document.getElementById('brand');
+  sel.innerHTML = '<option value="">All Brands</option>';
+  // brands is an array of strings
+  brands.forEach(function(b) {
+    var opt = document.createElement('option');
+    opt.value       = b.toLowerCase();
+    opt.textContent = b;
+    sel.appendChild(opt);
+  });
+}
+
+function populateRetailerDropdown(retailers) {
+  var sel = document.getElementById('retailer');
+  sel.innerHTML = '<option value="">All Retailers</option>';
+  // retailers is an object {RetailerID: Name, …}
+  Object.keys(retailers).forEach(function(id) {
+    var name = retailers[id];
+    var opt  = document.createElement('option');
+    opt.value       = name.toLowerCase();
+    opt.textContent = name;
+    sel.appendChild(opt);
+  });
+}
+
 
 function fetchCategories() {
   var xhr = new XMLHttpRequest();
@@ -54,7 +104,7 @@ function fetchCategories() {
 
 function populateCategoryDropdown(categories) {
   var select = document.getElementById('category');
-  // clear any existing options
+  
   select.innerHTML = '<option value="">All Categories</option>';
   for (var id in categories) {
     if (categories.hasOwnProperty(id)) {
@@ -66,8 +116,8 @@ function populateCategoryDropdown(categories) {
   }
 }
 
+//Builds a “GetAllProducts” payload and send it, then retrieves the relevant products
 function fetchAndRenderProducts(options){
-	
 
     options = options || {};
 
@@ -78,22 +128,22 @@ function fetchAndRenderProducts(options){
         search: {},
         fuzzy: (typeof options.fuzzy ===  'boolean' ? options.fuzzy : true)
     };
-    //search
+    //search: adds this filter  to search when sending to api
     if (options.search && options.search.text){
         payload.search.Title = options.search.text;
     }
-    //category
+    //category: adds this filter  to search when sending to api
     if (options.category){
         payload.search.Category = options.category;
     }
-    //price range
+    //price range: adds this filter  to search when sending to api
     if (typeof options.priceMin === 'number'){
         payload.search.price_min = options.priceMin;
     }
     if (typeof options.priceMax === 'number'){
         payload.search.price_max = options.priceMax;
     }
-    //sorting
+    //sorting: adds this when sending to the API
     if (options.sort){//sort on...
         payload.sort = options.sort;
     }
@@ -123,10 +173,10 @@ function fetchAndRenderProducts(options){
             return;
         }
 
-        //Grab all products
+        //get all products
         var products = resp.data;
 
-        //If category filtering was requested, apply it client-side
+        //category post filter
         if (options.category) {
             products = products.filter(function(p) {
             return Array.isArray(p.Categories) &&
@@ -135,6 +185,22 @@ function fetchAndRenderProducts(options){
                     });
             });
         }
+        //brand post filter
+        if (options.brand) {
+            products = products.filter(function(p){
+                return p.Brand && p.Brand.toLowerCase() === options.brand;
+            });
+        }
+        //retailer post-filter
+        if (options.retailer) {
+            products = products.filter(function(p){
+                return Array.isArray(p.Retailers) &&
+                p.Retailers.some(function(r){
+                    return r.Name.toLowerCase() === options.retailer;
+                });
+            });
+        }
+
         renderProducts(products);
         };
 
@@ -149,11 +215,21 @@ function fetchAndRenderProducts(options){
             var card = document.createElement('div');
             card.className = 'pro';
 
+            //get the average rating for each product
+            var avgRating = null;
+            if (Array.isArray(p.Reviews) && p.Reviews.length > 0){ //only show if there are ratings
+                var sum = p.Reviews.reduce(function(s,r){
+                    return s + r.Rating;
+                },0);
+                avgRating = (sum/p.Reviews.length).toFixed(1);
+            }
+
             card.innerHTML = 
             '<img src="' + p.Image_url + '" alt="' + p.Title + '">' +
             '<div class="description">' +
                 '<h5>' + p.Title + '</h5>' +
                 '<h4>From R' + (p.LowestPrice || '-') + '</h4>' +
+                (avgRating ? '<p class="avg-rating" >' + avgRating + ' ★</p>': '') +
             '</div>' +
             //compare button
             '<a href="#" class="compare-btn" title="Add to compare">' +
@@ -246,6 +322,9 @@ document.addEventListener("DOMContentLoaded", function() {
     fetchFavouritesList(function() {
         fetchAndRenderProducts();
     });
+    fetchDistinct('Brand',    populateBrandDropdown);
+    fetchDistinct('Retailer', populateRetailerDropdown);
+
     //search button
     document.getElementById('searchBut').addEventListener('click', function (){
         var text = document.getElementById('searchInput').value.trim();
@@ -280,4 +359,11 @@ document.addEventListener("DOMContentLoaded", function() {
             fetchAndRenderProducts();
         }
     });
+    document.getElementById('brand').addEventListener('change', function(e){
+        fetchAndRenderProducts({ brand: e.target.value });
+    });
+    document.getElementById('retailer').addEventListener('change', function(e){
+        fetchAndRenderProducts({ retailer: e.target.value });
+    });
+
 });
