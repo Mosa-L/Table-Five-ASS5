@@ -102,46 +102,86 @@ function showProductModal(edit = false, product = null) {
     document.getElementById('modalError').textContent = '';
     document.getElementById('productForm').reset();
     document.getElementById('editProductId').value = '';
-	document.getElementById('retailersList').innerHTML = '';
+    document.getElementById('retailersList').innerHTML = '';
+    document.getElementById('specList').innerHTML = '';
 
+	// Reset retailer and spec fields
     if (edit && product) {
         document.getElementById('prodName').value = product.Title || '';
         document.getElementById('prodBrand').value = product.Brand || '';
-        document.getElementById('prodPrice').value = product.LowestPrice || '';
         document.getElementById('prodCategory').value = Array.isArray(product.Categories) ? product.Categories.join(', ') : (product.Categories || '');
         document.getElementById('prodDesc').value = product.Description || '';
         document.getElementById('editProductId').value = product.ProductID;
-		document.getElementById('prodImage').value = product.Image_url || '';
-
-		// Populate retailers if present
+        document.getElementById('prodImage').value = product.Image_url || '';
+		if (product.Specifications && typeof product.Specifications === 'object') {
+			Object.entries(product.Specifications).forEach(([type, value]) => {
+				addSpecField({ type, value });
+			});
+			// If Specifications is an object, convert it to array format
+		} else if (product.Specs && Array.isArray(product.Specs)) {
+			product.Specs.forEach(s => {
+				addSpecField({
+					type: s.type || s.Type || '',
+					value: s.value || s.Value || ''
+				});
+			});
+		}
+        // Populate retailers if present
         if (product.Retailers && Array.isArray(product.Retailers)) {
             product.Retailers.forEach(r => {
                 addRetailerField({
                     name: r.Name || r.name || '',
-                    price: r.Price || r.price || ''
+                    price: r.Price || r.price || '',
+                    stock: r.Stock || r.stock || ''
                 });
             });
         }
     }
 }
-
-function addRetailerField(retailer = {name: '', price: ''}) {
+// add retailers input rows
+function addRetailerField(retailer = {name: '', price: '', stock: ''}) {
     const div = document.createElement('div');
     div.className = 'retailer-row';
-    div.style.display = 'flex';
-    div.style.gap = '8px';
-    div.style.marginBottom = '6px';
     div.innerHTML = `
-        <input type="text" class="retailer-name" placeholder="Retailer name" value="${retailer.name || ''}" style="flex:2; padding:6px; border-radius:5px; border:1px solid #ddd;">
-        <input type="number" class="retailer-price" placeholder="Price" min="0" step="0.01" value="${retailer.price || ''}" style="flex:1; padding:6px; border-radius:5px; border:1px solid #ddd;">
-        <button type="button" class="remove-retailer-btn" style="background:#d9534f; color:#fff; border:none; border-radius:5px; padding:0 10px; font-size:18px; cursor:pointer;">&times;</button>
+        <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start;">
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="text" class="retailer-name" placeholder="Retailer name" value="${retailer.name || ''}">
+                <input type="number" class="retailer-price" placeholder="Price" min="0" step="0.01" value="${retailer.price || ''}">
+                <button type="button" class="remove-retailer-btn">&times;</button>
+            </div>
+            <div style="display: flex; flex-direction: column; max-width: 200px;">
+                <label style="font-size: 13px; color: #555; margin-bottom: 2px;">Stock</label>
+                <input type="number" class="retailer-stock" placeholder="Stock" min="0" step="1" value="${retailer.stock || ''}">
+            </div>
+        </div>
     `;
     div.querySelector('.remove-retailer-btn').onclick = () => div.remove();
     document.getElementById('retailersList').appendChild(div);
 }
 
+
 document.getElementById('addRetailerBtn').onclick = function() {
     addRetailerField();
+};
+
+// Add spec input row
+function addSpecField(spec = {type: '', value: ''}) {
+    const div = document.createElement('div');
+    div.className = 'spec-row';
+    div.style.display = 'flex';
+    div.style.gap = '8px';
+    div.style.marginBottom = '6px';
+    div.innerHTML = `
+        <input type="text" class="spec-type" placeholder="Specification" value="${spec.type || ''}">
+        <input type="text" class="spec-value" placeholder="Value" value="${spec.value || ''}">
+        <button type="button" class="remove-spec-btn">&times;</button>
+    `;
+    div.querySelector('.remove-spec-btn').onclick = () => div.remove();
+    document.getElementById('specList').appendChild(div);
+}
+
+document.getElementById('addSpecBtn').onclick = function() {
+    addSpecField();
 };
 
 function hideProductModal() {
@@ -154,22 +194,40 @@ document.getElementById('addProductBtn').onclick = () => {
     showProductModal(false);
 };
 
+
+
 // Close modal
 document.getElementById('closeModal').onclick = hideProductModal;
-
-// Handle form submit (add/edit)
+// Handle form submission
 document.getElementById('productForm').onsubmit = function(e) {
     e.preventDefault();
     const title = document.getElementById('prodName').value.trim();
     const brand = document.getElementById('prodBrand').value.trim();
-    const price = parseFloat(document.getElementById('prodPrice').value);
     const category = document.getElementById('prodCategory').value.split(',').map(c => c.trim()).filter(Boolean);
     const description = document.getElementById('prodDesc').value.trim();
     const editId = document.getElementById('editProductId').value;
     const imageUrl = document.getElementById('prodImage').value.trim();
 
-    if (!title || !imageUrl || !brand || !category.length || !description || isNaN(price)) {
+    // Gather specs
+    const specs = Array.from(document.querySelectorAll('#specList .spec-row')).map(row => ({
+        type: row.querySelector('.spec-type').value.trim(),
+        value: row.querySelector('.spec-value').value.trim()
+    })).filter(s => s.type && s.value);
+
+    // Gather retailers
+    const retailers = Array.from(document.querySelectorAll('#retailersList .retailer-row')).map(row => ({
+        RetailerName: row.querySelector('.retailer-name').value.trim(),
+        Price: parseFloat(row.querySelector('.retailer-price').value),
+        Stock: parseInt(row.querySelector('.retailer-stock').value, 10)
+    })).filter(r => r.RetailerName && !isNaN(r.Price) && !isNaN(r.Stock));
+
+    if (!title || !imageUrl || !brand || !category.length || !description) {
         document.getElementById('modalError').textContent = 'Please fill all fields.';
+        return;
+    }
+
+    if (!retailers.length) {
+        document.getElementById('modalError').textContent = 'Please add at least one retailer.';
         return;
     }
 
@@ -181,11 +239,10 @@ document.getElementById('productForm').onsubmit = function(e) {
         Brand: brand,
         Description: description,
         Image_url: imageUrl,
-        // For addProduct, ProductID is auto-generated by DB, so don't send it unless editing
         ...(editId ? { ProductID: editId } : {}),
-        // For now, just send as a string or array
-        Categories: category,
-        Price: price
+        categories: category,
+        Specs: specs,
+        retailers
     };
 
     fetch(API_URL, {
@@ -219,6 +276,7 @@ document.getElementById('manager-products-grid').onclick = function(e) {
             showProductModal(true, prod);
         }
     }
+	// Delete button
     if (e.target.closest('.delete-btn')) {
         const id = e.target.closest('.delete-btn').dataset.id;
         if (confirm('Delete this product?')) {
@@ -255,12 +313,14 @@ document.getElementById('searchBut').onclick = function() {
         sort: document.getElementById('category').value
     });
 };
+// Search input listener
 document.getElementById('searchInput').oninput = function() {
     fetchAndRenderProducts({
         search: { text: this.value.trim() },
         sort: document.getElementById('category').value
     });
 };
+// Category dropdown change listener
 document.getElementById('category').onchange = function() {
     fetchAndRenderProducts({
         search: { text: document.getElementById('searchInput').value.trim() },

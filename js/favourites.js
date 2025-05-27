@@ -62,6 +62,7 @@ function renderFavourites(products){
 		var p = products[i];
 		var link = document.createElement('a');
 		link.className = 'favourite-card';
+		link.setAttribute('data-productid', p.ProductID);
 		var displayPrice = (p.LowestPrice !== undefined && p.LowestPrice !== null) ? p.LowestPrice : p.price;
 
 		link.innerHTML = '<span class="remove-fav" title="Remove"><i class="fa-solid fa-xmark"></i></span>' +
@@ -71,6 +72,15 @@ function renderFavourites(products){
 		'<h4>R' + (displayPrice ? displayPrice.toLocaleString() : ' ') + '</h4>' +
 		'</div>' +
 		'<span class="compare-fav" title="Compare"><i class="fa-solid fa-arrow-right-arrow-left"></i></span>';
+
+		// Make the whole card clickable (except the remove/compare buttons)
+        link.addEventListener('click', function(e){
+            // Prevent navigation if clicking remove or compare
+            if (e.target.closest('.remove-fav') || e.target.closest('.compare-fav')) return;
+			var pid = this.getAttribute('data-productid');
+			window.location.href = 'view.html?productID=' + pid;
+        });
+
 
 		container.appendChild(link);
 
@@ -100,11 +110,13 @@ function renderFavourites(products){
 
 }
 
+// Show error message in the favourites container
 function showError(msg){
     var container = document.querySelector('.favourites-container');
     container.innerHTML = '<p class="error">' + msg + '</p>';
 }
 
+// Remove a product from favourites
 function removeFavourite(productID){
     var xhr = new XMLHttpRequest();
     xhr.open('POST', API_URL, true);

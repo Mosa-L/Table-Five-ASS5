@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			body: JSON.stringify({
 				type: 'GetAllProducts',
 				apikey: apiKey,
-				search: { ProductID: compareList[0] }, // Only one for now, or loop for multiple
+				search: { ProductID: compareList[0] }, 
 				return: '*'
 			})
 		})
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <div class="search-results"></div>
             </div>
-        `;
+        `; 
         // Insert modal before the compare grid so it appears above add product boxes
         const compareGrid = document.querySelector('#compare-grid') || document.body;
         compareGrid.parentNode.insertBefore(modal, compareGrid);

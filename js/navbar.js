@@ -19,13 +19,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (favLink) favLink.parentNode.remove();
     }
 
-	// Require login for favourites
-	// if(!apiKey || apiKey === '3a160d66562032f9'){
-	// 	alert('You must be logged in to add favourites.');
-	// 	window.location.href = 'login.html';
-	// 	return;
-	// }
-
     // Only update navbar if user is logged in (not default/fake key)
     if (apiKey && apiKey !== '3a160d66562032f9') {
         // Remove login button

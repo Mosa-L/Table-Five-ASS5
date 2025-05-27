@@ -131,6 +131,7 @@ function renderReviewHistogram(products){
         }
     });
 
+	//assigns ratings to bars
     [1,2,3,4,5].forEach(function(star){
         var barEl = document.querySelector('.dashboard-review-bar-' + star);
         var count = histogram[star] || 0;
@@ -145,4 +146,3 @@ function renderReviewHistogram(products){
     });
 }
 
-//'<em style="font-size:0.9em;">' + new Date(r.ReviewDate).toLocaleDateString() + '</em><br>' +
