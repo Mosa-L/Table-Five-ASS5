@@ -13,4 +13,5 @@ the products being added will have specification of the product dimensions, desc
 
 Edit products:Again only managers will be permitted to make any changes to the products 
 
+To be able to run the website you will need your own database, the composer package manager and your own .env file with your credentials.
 
