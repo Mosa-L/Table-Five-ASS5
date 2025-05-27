@@ -1226,11 +1226,11 @@ button.checkBut{/*For the checkout button*/
     margin-bottom: 4px;
 }
 
-.dashboard-review-bar-1 { background: #e5d3b3; }
-.dashboard-review-bar-2 { background: #d4a373; }
-.dashboard-review-bar-3 { background: #bfa06a; }
-.dashboard-review-bar-4 { background: #c8852e; }
-.dashboard-review-bar-5 { background: #ffd700; }
+.dashboard-review-bar-1 { background: red; }
+.dashboard-review-bar-2 { background: orange; }
+.dashboard-review-bar-3 { background: yellow; }
+.dashboard-review-bar-4 { background: yellowgreen; }
+.dashboard-review-bar-5 { background: green; }
 
 .dashboard-review-bar-label {
     font-size: 15px;
