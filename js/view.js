@@ -4,21 +4,14 @@ document.addEventListener('DOMContentLoaded', function(){
         return urlParams.get(param);
     }
 
+	// Get product ID from URL
     const productId = getQueryParam('productID');
     if(!productId){
         alert('No product specified.');
         return;
     }
 
-    //API key from localStorage (if user is logged in)
-    // let apiKey = null;
-    // const user = localStorage.getItem('apikey');
-    // if(user){
-    //     try{
-    //         apiKey = JSON.parse(user).apikey;
-    //     } catch (e) {}
-    // }
-	const apiKey = localStorage.getItem('apikey');
+	const apiKey = localStorage.getItem('apikey') || '3a160d66562032f9';
 
     // Fetch product info
     fetch('api.php', {
@@ -56,17 +49,19 @@ document.addEventListener('DOMContentLoaded', function(){
         }
         // Render retailers
         let retailersHtml = '';
-        if(product.Retailers && product.Retailers.length){
-            retailersHtml = '<table style="width:100%; margin-bottom:20px;">';
-            product.Retailers.forEach(r => {
-                retailersHtml += `<tr>
-                    <td>${r.Name}</td>
-                    <td>R${r.Price}</td>
-                    <td><a href="${r.Website_url}" target="_blank" class="buy-link">Buy</a></td>
-                </tr>`;
-            });
-            retailersHtml += '</table>';
-        }
+		if(product.Retailers && product.Retailers.length){
+			retailersHtml = '<table style="width:100%; margin-bottom:20px;">';
+			product.Retailers.forEach(r => {
+				const stockStatus = (r.Stock > 0) ? '<span style="color:green;">In Stock</span>' : '<span style="color:red;">Out of Stock</span>';
+				retailersHtml += `<tr>
+					<td>${r.Name}</td>
+					<td>R${r.Price}</td>
+					<td>${stockStatus}</td>
+					<td><a href="${r.Website_url}" target="_blank" class="buy-link">Buy</a></td>
+				</tr>`;
+			});
+			retailersHtml += '</table>';
+		}
         //reviews
         let reviewsHtml = '';
         if(product.Reviews && product.Reviews.length){

@@ -12,9 +12,6 @@
     <div id="header" class="section-padding">
         <img class="navlogo" src="./images/COMPAREIT Logo - Black with Transparent Background.svg" alt="CompareIt Logo"/>
         <ul id="navbar">
-            <li><a href="index.html"><i class="fa-solid fa-house"></i></a></li>
-            <li><a href="compare.html">Compare</a></li>
-            <li><a href="favourites.html">Favourites</a></li>
             <li><a href="manager.html" class="active">Manager</a></li>
             <li><a href="dashboard.html">Dashboard</a></li>
         </ul>
@@ -57,26 +54,28 @@
                     <label for="prodName">Product Name:</label>
                     <input type="text" id="prodName" name="prodName" required>
                 </div>
-                <div class="form-group">
-                    <label for="prodRetailer">Retailer:</label>
-                    <input type="text" id="prodRetailer" name="prodRetailer"  required>
-                </div>
-                <div class="form-group">
-                    <label for="prodPrice">Price:</label>
-                    <input type="number" id="prodPrice" name="prodPrice" min="0" step="0.01" required>
+				<div class="form-group">
+                    <label for="prodBrand">Brand:</label>
+                    <input type="text" id="prodBrand" name="prodBrand" required>
                 </div>
                 <div class="form-group">
                     <label for="prodCategory">Categories (comma separated):</label>
                     <input type="text" id="prodCategory" name="prodCategory" placeholder="e.g. electronics, laptops" required>
                 </div>
                 <div class="form-group">
+                    <label>Specs:</label>
+                    <div id="specList"></div>
+                    <button type="button" id="addSpecBtn" style="margin-top:8px; background:burlywood; color:#fff; border:none; border-radius:6px; padding:6px 14px; font-size:14px; cursor:pointer;">
+                        <i class="fa fa-plus"></i> Add Spec
+                    </button>
+                </div>
+                <div class="form-group">
                     <label for="prodDesc">Description:</label>
                     <textarea id="prodDesc" name="prodDesc" rows="3" required></textarea>
                 </div>
-                <div class="form-group">
-                    <label for="prodImages">Images:</label>
-                    <input type="file" id="prodImages" name="prodImages" accept="image/*" multiple>
-                    <div id="imagePreview" style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;"></div>
+				<div class="form-group">
+                    <label for="prodImage">Image:</label>
+                    <input type="text" id="prodImage" name="prodImage" required>
                 </div>
                 <div class="form-group">
                     <label>Retailers & Prices (optional):</label>
@@ -93,7 +92,7 @@
             </form>
         </div>
     </div>
-
     <script src="js/manager.js"></script>
+	<script src="js/navbar.js"></script>
 </body>
 </html>

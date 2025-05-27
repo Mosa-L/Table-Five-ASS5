@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById('loginForm');
     const errorMessage = document.getElementById('errorMessage');
 
+	// Clear any previous error message
     loginForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -13,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+		// Validate email format
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         if(!emailRegex.test(email)){
             errorMessage.textContent = "Please enter a valid email address";
@@ -40,44 +42,74 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify(loginData)
         })
         .then(response => {
-			// Check if the response is OK before trying to parse JSON
 			if (!response.ok) {
-				return response.text().then(text => {
-					throw new Error(`Server error: ${response.status}. Details: ${text.substring(0, 100)}...`);
-				});
-			}
-			return response.json();
+        return response.text().then(text => {
+            // Try to parse as JSON and throw the whole JSON string
+            try {
+                const json = JSON.parse(text);
+                throw new Error(JSON.stringify(json));
+            } catch {
+                throw new Error(text);
+            }
+        });
+    }
+		return response.json();
 		})
-        .then(data => {
+		// Handle the response
+		.then(data => {
+			loginButton.textContent = originalButtonText;
+			loginButton.disabled = false;
 
-            loginButton.textContent = originalButtonText;
-            loginButton.disabled = false;
-            
-            if(data.status === "success"){
-
-				let user=data.data[0];
-                localStorage.setItem('apikey', user.apikey);
+			if(data.status === "success"){
+				let user = data.data[0];
+				localStorage.setItem('apikey', user.apikey);
 				localStorage.setItem('name', user.name);
 				localStorage.setItem('surname', user.surname);
-                
-                errorMessage.textContent = "Login successful!";
-                errorMessage.style.color = "green";
-                
-                setTimeout(() => {
-                    window.location.href = "index.html";
-                }, 1000);
-            }else{
+				localStorage.setItem('user_type', user.user_type);
 
-                errorMessage.textContent = data.data || "Login failed. Please try again.";
-                errorMessage.style.color = "red";
-            }
-        })
-        .catch(error => {
-            loginButton.textContent = originalButtonText;
-            loginButton.disabled = false;
-            
-            errorMessage.textContent = "An error occurred during login. Please try again.";
-            console.error('Login error:', error);
-        });
+				errorMessage.textContent = "Login successful!";
+				errorMessage.style.color = "green";
+
+				// Redirect after a short delay
+				setTimeout(() => {
+					if (user.user_type === 'Manager') {
+						window.location.href = "manager.html";
+					} else {
+						window.location.href = "index.html";
+					}
+				}, 1000);
+			} else {
+				// Show API-provided error message (lockout, attempts left, etc.)
+				errorMessage.textContent = data.data || "Login failed. Please try again.";
+				errorMessage.style.color = "red";
+			}
+		})
+		.catch(error => {
+			loginButton.textContent = originalButtonText;
+			loginButton.disabled = false;
+
+			let msg = "An error occurred during login. Please try again.";
+
+			// Try to extract the 'data' property from a JSON error message
+			try {
+				// If error.message looks like a JSON string, parse it
+				if (error.message.trim().startsWith('{')) {
+					const json = JSON.parse(error.message);
+					if (json && json.data) {
+						msg = json.data;
+					}
+				} else if (error.message) {
+					// If the API error message is just the data string, use it
+					msg = error.message;
+				}
+			} catch (e) {
+				// Ignore parsing errors, fallback to generic message
+			}
+
+			// Show error details if available
+			errorMessage.textContent = msg;
+			errorMessage.style.color = "red";
+			console.error('Login error:', error);
+		});
     });
 });

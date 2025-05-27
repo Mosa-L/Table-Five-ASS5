@@ -1,3 +1,5 @@
+// Description: Handles the signup form validation and submission
+// This script validates the signup form, checks for errors, and submits the data to the server.
 document.addEventListener('DOMContentLoaded', function (){
     var form = document.getElementById('signupForm');
     var errorEl = document.getElementById('errorMessage');

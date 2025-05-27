@@ -1,24 +1,40 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Get user API key from localStorage (if available)
-    //let apiKey = null;
-    const apiKey = localStorage.getItem('apikey');
-    // if(apikey){
-    //     try {
-            
-    //     } catch (e){
-    //         console.error('Error parsing user data', e);
-    //     }
-    // }
-
-    // If no API key, redirect to login
-    if(!apiKey){
-        alert('Please log in to use the compare feature');
-        window.location.href = 'login.html';
-        return;
-    }
+    const apiKey = localStorage.getItem('apikey') || '3a160d66562032f9'; // Default key for testing
 
     // Get compare list from localStorage
     let compareList = JSON.parse(localStorage.getItem('compareList')) || [];
+
+	// If compareList contains only IDs, fetch full product info
+	if (compareList.length && typeof compareList[0] !== 'object') {
+		fetch('api.php', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				type: 'GetAllProducts',
+				apikey: apiKey,
+				search: { ProductID: compareList[0] }, 
+				return: '*'
+			})
+		})
+		.then(response => response.json())
+		.then(data => {
+			if (data.status === 'success' && data.data.length > 0) {
+				compareList = data.data;
+				localStorage.setItem('compareList', JSON.stringify(compareList));
+				renderCompareGrid();
+			} else {
+				compareList = [];
+				renderCompareGrid();
+			}
+		})
+		.catch(() => {
+			compareList = [];
+			renderCompareGrid();
+		});
+	} else {
+		renderCompareGrid();
+	}
     
     // Initialize container
     const compareContainer = document.querySelector('.compare-container');
@@ -44,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <div class="search-results"></div>
             </div>
-        `;
+        `; 
         // Insert modal before the compare grid so it appears above add product boxes
         const compareGrid = document.querySelector('#compare-grid') || document.body;
         compareGrid.parentNode.insertBefore(modal, compareGrid);
@@ -203,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
 		// Remove comparison table if no products left
 		if(compareList.length === 0){
-			const existingTable = document.querySelector('.comparison-table-container');
+			const existingTable = document.querySelector('.compare-table-container');
 			if(existingTable){
 				existingTable.remove();
 			}

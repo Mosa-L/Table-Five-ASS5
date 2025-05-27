@@ -1,59 +1,17 @@
 var API_URL = './api.php';
-var apiKey = localStorage.getItem('apikey') || '3a160d66562032f9';
+var apiKey = localStorage.getItem('apikey');
+var navBar = document.getElementById('header');
 
 document.addEventListener('DOMContentLoaded', function (){
-    if (!apiKey){
+    // If no API key, redirect to login
+    if(!apiKey){
+        alert('Please log in to view your favourites.');
         window.location.href = 'login.html';
         return;
     }
     fetchAndRenderFavourites();
 });
 
-if (apiKey){
-    //remove login button
-    var loginLink = navBar.querySelector('a[href="login.html"]');
-    if (loginLink){
-        var li = loginLink.parentNode;
-        li.parentNode.removeChild(li);
-    }
-    //remove signup button
-    var signupLink = navBar.querySelector('a[href="signup.html"]');
-    if (signupLink){
-        var li2 = signupLink.parentNode;
-        li2.parentNode.removeChild(li2);
-    }
-
-    //add greeting
-    var storedname = localStorage.getItem('name');
-    if (storedname){
-        var greetingLi = document.createElement('li');
-        var greetSpan = document.createElement('span');
-        greetSpan.textContent = 'Hello, ' + storedname + '!';
-        greetSpan.style.marginRight = '1em';
-        greetingLi.appendChild(greetSpan);
-
-        var navBar = document.getElementById('navbar');
-        navBar.insertBefore(greetingLi, navBar.firstChild);
-    }
-
-    //adds logout button
-    var logoutLi = document.createElement('li');
-    logoutLi.style.listStyleType = 'none';
-    logoutLi.style.display       = 'inline-block';
-    logoutLi.style.marginRight   = '1em';
-    var logoutA = document.createElement('a');
-    logoutA.href = '#';
-    logoutA.textContent = 'Logout';
-    logoutLi.appendChild(logoutA);
-    navBar.appendChild(logoutLi);
-
-    //clear apikey and redirect to favourites
-    logoutA.addEventListener('click', function(e){
-        e.preventDefault();
-        localStorage.clear();
-        window.location.href = 'favourites.html';
-    });
-}
 
 //fetching users favs from api and rendering them
 function fetchAndRenderFavourites(){
@@ -101,58 +59,64 @@ function renderFavourites(products){
     }
 
     for (var i = 0; i < products.length; i++){
-        var p = products[i];
-        var link = document.createElement('a');
-        link.className = 'favourite-card';
+		var p = products[i];
+		var link = document.createElement('a');
+		link.className = 'favourite-card';
+		link.setAttribute('data-productid', p.ProductID);
+		var displayPrice = (p.LowestPrice !== undefined && p.LowestPrice !== null) ? p.LowestPrice : p.price;
 
-        link.innerHTML = '<span class="remove-fav" title="Remove"><i class="fa-solid fa-xmark"></i></span>' +
-        '<img src="' + p.Image_url + '" alt="' + p.Title + '">' +
-        '<div class="fav-desc">' +
-        '<h5>' + p.Title + '</h5>' +
-        '<h4>R' + (p.LowestPrice ? p.LowestPrice.toLocaleString() : ' ') + '</h4>' +
-        '</div>' +
-        '<span class="compare-fav" title="Compare"><i class="fa-solid fa-arrow-right-arrow-left"></i></span>';
+		link.innerHTML = '<span class="remove-fav" title="Remove"><i class="fa-solid fa-xmark"></i></span>' +
+		'<img src="' + p.Image_url + '" alt="' + p.Title + '">' +
+		'<div class="fav-desc">' +
+		'<h5>' + p.Title + '</h5>' +
+		'<h4>R' + (displayPrice ? displayPrice.toLocaleString() : ' ') + '</h4>' +
+		'</div>' +
+		'<span class="compare-fav" title="Compare"><i class="fa-solid fa-arrow-right-arrow-left"></i></span>';
 
-        container.appendChild(link);
-
-        (function(pid,cardEl){
-            var btn = cardEl.querySelector('.remove-fav');
-            btn.addEventListener('click', function (e){
-                e.preventDefault();
-                e.stopPropagation();
-                removeFavourite(pid);
-                cardEl.parentNode.removeChild(cardEl);
-            });
-        })(p.ProductID, link);
-    }
-
-    (function(product, cardEl){
-    var cmpBtn = cardEl.querySelector('.compare-fav');
-    if (!cmpBtn) return;
-
-    cmpBtn.addEventListener('click', function(e){
-        e.preventDefault();
-        e.stopPropagation();
-
-        var list = JSON.parse(localStorage.getItem('compareList') || '[]');
-
-        var exists = list.some(function(item){
-        return item.ProductID === product.ProductID;
+		// Make the whole card clickable (except the remove/compare buttons)
+        link.addEventListener('click', function(e){
+            // Prevent navigation if clicking remove or compare
+            if (e.target.closest('.remove-fav') || e.target.closest('.compare-fav')) return;
+			var pid = this.getAttribute('data-productid');
+			window.location.href = 'view.html?productID=' + pid;
         });
-        if (!exists) list.push(product);
 
-        localStorage.setItem('compareList', JSON.stringify(list));
-        window.location.href = 'compare.html';
-    });
-    })(p, link);
+
+		container.appendChild(link);
+
+		// Remove favourite handler
+		(function(pid,cardEl){
+			var btn = cardEl.querySelector('.remove-fav');
+			btn.addEventListener('click', function (e){
+				e.preventDefault();
+				e.stopPropagation();
+				removeFavourite(pid);
+				cardEl.parentNode.removeChild(cardEl);
+			});
+		})(p.ProductID, link);
+
+		// Compare handler 
+		(function(product, cardEl){
+			var cmpBtn = cardEl.querySelector('.compare-fav');
+			if (!cmpBtn) return;
+			cmpBtn.addEventListener('click', function(e){
+				e.preventDefault();
+				e.stopPropagation();
+				localStorage.setItem('compareList', JSON.stringify([product.ProductID]));
+				window.location.href = 'compare.html';
+			});
+		})(p, link);
+	}
 
 }
 
+// Show error message in the favourites container
 function showError(msg){
     var container = document.querySelector('.favourites-container');
     container.innerHTML = '<p class="error">' + msg + '</p>';
 }
 
+// Remove a product from favourites
 function removeFavourite(productID){
     var xhr = new XMLHttpRequest();
     xhr.open('POST', API_URL, true);
