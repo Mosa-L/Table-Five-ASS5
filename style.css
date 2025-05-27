@@ -1091,6 +1091,30 @@ button.checkBut{/*For the checkout button*/
     padding: 10px 12px;
 }
 
+/* Fix search and filters alignment in manager dashboard */
+.manager-dashboard-wrapper .searchCont,
+.manager-dashboard-wrapper .filters {
+    position: static !important;
+    left: unset !important;
+    width: auto !important;
+    margin: 0;
+    flex: 1 1 0;
+    min-width: 200px;
+    max-width: 500px;
+}
+
+.manager-dashboard-wrapper .filters {
+    margin-left: 16px;
+    flex: 0 0 220px;
+    max-width: 220px;
+}
+
+/* Optional: Make controls row wrap on small screens */
+.manager-controls-row {
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
 /* Manager Products Grid */
 .manager-products-grid {
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
